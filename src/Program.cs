@@ -1,4 +1,5 @@
 using AspNetCore.Identity.MongoDbCore.Infrastructure;
+using KnowledgeExtractionTool.Infra;
 using KnowledgeExtractionTool.Infra.Services;
 using KnowledgeExtractionTool.Infra.Services.InfraDomain;
 using KnowledgeExtractionTool.Infra.Services.Interfaces;
@@ -8,6 +9,7 @@ using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
 
 # region DIs
 builder.Services.AddSingleton<ITextProcessorService>(provider => {
@@ -32,10 +34,16 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     return client.GetDatabase(appSettings.DatabaseName);
 });
 
+builder.Services.AddSingleton<JwtProvider>(sp => {
+    var options = sp.GetRequiredService<IOptions<JwtOptions>>();
+    return new JwtProvider(options);
+});
+
 builder.Services.AddSingleton<UserService>(sp =>
 {
     var mongoDb = sp.GetRequiredService<IMongoDatabase>();
-    return new UserService(mongoDb);
+    var provider = sp.GetRequiredService<JwtProvider>();
+    return new UserService(mongoDb, provider);
 });
 # endregion
 

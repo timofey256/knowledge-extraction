@@ -7,3 +7,10 @@ public class AppSettings {
     public required string ConnectionString { get; set; }
     public required string DatabaseName { get; set; }
 }
+
+public class JwtOptions { 
+    public required string SecretKey { get; set; }
+    public required string Audience { get; set; }
+    public required string Issuer { get; set; }
+    public required double ExpiresInHours { get; set; }
+}

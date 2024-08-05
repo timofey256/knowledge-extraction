@@ -3,7 +3,7 @@ namespace KnowledgeExtractionTool.Infra.Services.InfraDomain;
 using AspNetCore.Identity.MongoDbCore.Models;
 using System.ComponentModel.DataAnnotations;
 
-public class RegisterModel
+public class RegisterRequest
 {
     [Required]
     [EmailAddress]
@@ -14,7 +14,7 @@ public class RegisterModel
     public required string Password { get; set; }
 }
 
-public class LoginModel
+public class LoginRequest
 {
     [Required]
     [EmailAddress]

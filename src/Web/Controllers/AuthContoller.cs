@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using KnowledgeExtractionTool.Infra.Services;
 using KnowledgeExtractionTool.Infra.Services.InfraDomain;
 
 [ApiController]
@@ -13,7 +14,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterModel model)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
         if (await _userService.RegisterAsync(model.Email, model.Password))
         {
@@ -23,12 +24,12 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginModel model)
+    public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
-        var user = await _userService.AuthenticateAsync(model.Email, model.Password);
-        if (user != null)
+        var token = await _userService.AuthenticateAsync(model.Email, model.Password);
+        if (token != null)
         {
-            return Ok(); // Here, you might want to return a JWT or some other token
+            return Ok(token); // Here, you might want to return a JWT or some other token
         }
         return Unauthorized();
     }

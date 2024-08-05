@@ -1,3 +1,5 @@
+namespace KnowledgeExtractionTool.Infra.Services;
+
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Security.Cryptography;
@@ -7,10 +9,12 @@ using KnowledgeExtractionTool.Core.Domain;
 public class UserService
 {
     private readonly IMongoCollection<User> _users;
+    private readonly JwtProvider _jwtProvider;
 
-    public UserService(IMongoDatabase database)
+    public UserService(IMongoDatabase database, JwtProvider jwtProvider)
     {
         _users = database.GetCollection<User>("Users");
+        _jwtProvider = jwtProvider;
     }
 
     public async Task<bool> RegisterAsync(string email, string password)
@@ -37,13 +41,13 @@ public class UserService
         }
     }
 
-    public async Task<User?> AuthenticateAsync(string email, string password)
+    public async Task<string?> AuthenticateAsync(string email, string password)
     {
-        var user = await _users.Find(u => u.Email == email).FirstOrDefaultAsync();
+        User user = await _users.Find(u => u.Email == email).FirstOrDefaultAsync();
         if (user == null) return null;
 
         var hash = HashPassword(password, user.Salt);
-        return user.PasswordHash == hash ? user : null;
+        return user.PasswordHash == hash ? _jwtProvider.GenerateToken(user) : null;
     }
 
     private static string GenerateSalt()
