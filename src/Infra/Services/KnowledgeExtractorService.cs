@@ -16,7 +16,7 @@ public class KnowledgeExtractorService {
 
     public string ExtractKnowledge(string context) {
         string prompt = _prompts.ConstructFinalPrompt(context);
-        _logger.Log(LogLevel.Debug, $"Sent prompt: {prompt}");
+        _logger.Log(LogLevel.Information, $"Sent prompt: {prompt}");
         string response = _llmQueryService.GetResponseSync(prompt); 
 
         return response;

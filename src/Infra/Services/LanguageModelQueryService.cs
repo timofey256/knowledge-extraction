@@ -51,7 +51,7 @@ namespace KnowledgeExtractionTool.Infra.Services
             var responseContent = await response.Content.ReadAsStringAsync();
             dynamic responseObject = JsonConvert.DeserializeObject(responseContent);
             
-            _logger.Log(LogLevel.Debug, $"LLM response: {responseContent}");
+            _logger.Log(LogLevel.Information, $"LLM response: {responseContent}");
 
             return responseObject.choices[0].message.content;
         }
