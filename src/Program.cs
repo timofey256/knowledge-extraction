@@ -1,9 +1,6 @@
-using AspNetCore.Identity.MongoDbCore.Infrastructure;
 using KnowledgeExtractionTool.Infra;
 using KnowledgeExtractionTool.Infra.Services;
-using KnowledgeExtractionTool.Infra.Services.InfraDomain;
 using KnowledgeExtractionTool.Infra.Services.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
