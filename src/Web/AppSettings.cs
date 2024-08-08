@@ -13,4 +13,5 @@ public class JwtOptions {
     public required string Audience { get; set; }
     public required string Issuer { get; set; }
     public required double ExpiresInHours { get; set; }
+    public required string CookiesKey { get; set; }
 }

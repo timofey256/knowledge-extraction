@@ -1,6 +1,7 @@
 using KnowledgeExtractionTool.Infra;
 using KnowledgeExtractionTool.Infra.Services;
 using KnowledgeExtractionTool.Infra.Services.Interfaces;
+using KnowledgeExtractionTool.Extensions;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -16,7 +17,9 @@ builder.Services.AddSingleton<ITextProcessorService>(provider => {
 
 builder.Services.AddSingleton<KnowledgeExtractorService>();
 builder.Services.AddHttpClient<LanguageModelQueryService>();
-builder.Services.AddControllers(); 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddControllers();
+builder.Services.AddApiAutentication(builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>());
 
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
@@ -40,7 +43,8 @@ builder.Services.AddSingleton<UserService>(sp =>
 {
     var mongoDb = sp.GetRequiredService<IMongoDatabase>();
     var provider = sp.GetRequiredService<JwtProvider>();
-    return new UserService(mongoDb, provider);
+    var logger = sp.GetRequiredService<ILogger<KnowledgeExtractorService>>();
+    return new UserService(mongoDb, provider, logger);
 });
 # endregion
 
@@ -64,6 +68,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers(); // Maps controllers to routes

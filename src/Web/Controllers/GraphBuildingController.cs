@@ -3,24 +3,33 @@ namespace KnowledgeExtractionTool.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using KnowledgeExtractionTool.Infra.Services.Interfaces;
 using KnowledgeExtractionTool.Infra.Services;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("[controller]")]
-public class WeatherForecastController : ControllerBase
+public class KnowledgeExtractionController : ControllerBase
 {
-    private readonly ILogger<WeatherForecastController> _logger;
+    private readonly ILogger<KnowledgeExtractionController> _logger;
     private readonly ITextProcessorService _textProcessorService;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger, ITextProcessorService textProcessor)
+    public KnowledgeExtractionController(ILogger<KnowledgeExtractionController> logger, ITextProcessorService textProcessor)
     {
         _logger = logger;
         _textProcessorService = textProcessor;
     }
 
-    [HttpGet(Name = "ProcessText")]
-    public string Get(string text)
+    [Authorize]
+    [HttpGet("process-text", Name = "ProcessText")]
+    public IActionResult GetProcessedText(string text)
     {
         _logger.Log(LogLevel.Information, "Hit someEndpoint endpoint!");
-        return _textProcessorService.Process(text);
+        return Ok(_textProcessorService.Process(text));
+    }
+
+    [Authorize]
+    [HttpGet("dummy-endpoint", Name = "Dummy")]
+    public IActionResult DummyGet(string text)
+    {
+        return Ok("Autorized");
     }
 }
