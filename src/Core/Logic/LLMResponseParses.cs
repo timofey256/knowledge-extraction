@@ -26,9 +26,9 @@ class DirectedKnowledgeEdgeConstruction {
 /// Parses LLM's output to Knowledge Graph. 
 /// </summary>
 class LLMResponseParser {
-    /// LLM supposingly returns JSON (as we requested in prompt).
-    /// But can we really trust that output will be serializable to JSON?
-    /// Even one wrong character will crash the serialization, so `Json.Serializer(output)` is not an option.
+    /// LLM supposingly returns JSON (as we request in prompt).
+    /// But can we really trust that output will be JSON deserializable?
+    /// Even one wrong character might crash the derialization, so `Json.Derializer(output)` is not an option.
     /// This class will read output line by line and parse LLMs output. It's more reliable.
 
     public static KnowledgeGraph ConstructGraphFromLLMResponse(string output) {
