@@ -7,7 +7,6 @@ using KnowledgeExtractionTool.Infra.Services.Interfaces;
 /// Processes given text using Process(string).
 /// What does processing involve? 
 /// 1. Removing stop words.
-/// 2. Lematization.
 /// </summary>
 public class TextProcessorService : ITextProcessorService {
 

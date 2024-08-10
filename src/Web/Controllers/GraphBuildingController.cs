@@ -1,9 +1,10 @@
 namespace KnowledgeExtractionTool.Controllers;
 
+using System.Web;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using KnowledgeExtractionTool.Infra.Services.Interfaces;
 using KnowledgeExtractionTool.Infra.Services;
-using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("[controller]")]
@@ -31,5 +32,22 @@ public class KnowledgeExtractionController : ControllerBase
     public IActionResult DummyGet(string text)
     {
         return Ok("Autorized");
+    }
+
+    [Authorize]
+    [HttpPost("file-upload", Name = "FileUpload")]
+    public async Task<ActionResult> UploadFile(IFormFile file)
+    {
+        var filePath = Path.GetTempFileName();
+
+        if (file.Length > 0)
+        {
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+        }
+
+        return Ok(filePath);
     }
 }

@@ -3,6 +3,9 @@ namespace KnowledgeExtractionTool.Infra.Services;
 using KnowledgeExtractionTool.Core.Domain;
 using Microsoft.Extensions.Options;
 
+/// <summary>
+/// Extracts knowledge from the given text (context) in form of knowledge graph.  
+/// </summary>
 public class KnowledgeExtractorService {
     private readonly LanguageModelQueryService _llmQueryService;
     private readonly Prompts _prompts;
