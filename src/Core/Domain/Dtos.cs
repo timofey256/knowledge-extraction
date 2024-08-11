@@ -1,1 +1,0 @@
-namespace KnowledgeExtractionTool.Core.Dtos;
