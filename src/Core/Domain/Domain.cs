@@ -2,7 +2,8 @@ using KnowledgeExtractionTool.Core.Interfaces;
 
 namespace KnowledgeExtractionTool.Core.Domain;
 
-// CLI Mutable
+#region CLI-mutables
+
 public class Prompts { 
     public string SystemPrompt { get; set; }
 
@@ -11,12 +12,13 @@ public class Prompts {
     }
 }
 
-// CLI Mutable
 public class PromptsCollection { 
     public Prompts Default { get; set; }
 }
 
-// ======
+#endregion
+
+#region Graph-related stuff
 
 public record class DirectedKnowledgeEdge { 
     public string Node1 { get; init; }
@@ -57,15 +59,17 @@ public record class KnowledgeGraph : IHasId {
         CreatedAtUTC = createdAt;
     }
 
-    public override string ToString()
+    public override string? ToString()
     {
         // TODO: rewrite:
         return base.ToString();
     }
 }
 
+#endregion
+
 /// <summary>
-/// Type storing texts which users send us. We call them contexts
+/// Type storing texts which users send us. We call them contexts.
 /// </summary>
 public record class Context : IHasId {
     public string Id { get; init; }
@@ -75,6 +79,6 @@ public record class Context : IHasId {
     public Context(string context) {
         Id = Guid.NewGuid().ToString();
         FullText = context;
-        Description = ""; // Maybe add summarization of the context in the future???
+        Description = ""; // TODO: add summarization of the context in the future???
     }
 }
