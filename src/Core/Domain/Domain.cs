@@ -40,14 +40,15 @@ public record class DirectedKnowledgeEdge {
         if (importance > _maxImportance || importance < _minImportance)
             throw new ArgumentException($"Node imporance is not in the valid range. Valid range : [{_minImportance}, {_maxImportance}] but actual value is {importance}");
     }
-
 }
 
 public record class KnowledgeGraph { 
     public DirectedKnowledgeEdge[] Edges { get; init; }
+    public DateTime CreatedAtUTC { get; init; }
     
-    public KnowledgeGraph(DirectedKnowledgeEdge[] edges) {
+    public KnowledgeGraph(DirectedKnowledgeEdge[] edges, DateTime createdAt) {
         Edges = edges;
+        CreatedAtUTC = createdAt;
     }
 
     public override string ToString()

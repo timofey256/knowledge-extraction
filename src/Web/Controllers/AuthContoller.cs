@@ -25,11 +25,12 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
-        if (await _userService.RegisterAsync(model.Email, model.Password))
-        {
-            return Ok();
-        }
-        return BadRequest("Registration failed.");
+        var registrationResult = await _userService.RegisterAsync(model.Email, model.Password);
+        return registrationResult.Match<IActionResult>(
+            success: () => Ok(),
+            usedEmailError: () => BadRequest("Email is already used."),
+            failedInsertionError: (errorMessage) => Problem($"Error occured while trying to insert in MongoDB. ErrorMessage:\n{errorMessage}")
+        );
     }
 
     [HttpPost("login")]

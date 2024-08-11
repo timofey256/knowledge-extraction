@@ -1,6 +1,5 @@
 namespace KnowledgeExtractionTool.Infra.Services;
 
-using KnowledgeExtractionTool.Core.Logic;
 using KnowledgeExtractionTool.Infra.Services.Interfaces;
 
 /// <summary>
@@ -16,6 +15,6 @@ public class TextProcessorService : ITextProcessorService {
     }    
     
     public string Process(string text) {
-        return _knowledgeExtractorService.ExtractKnowledge(text);
+        return "";
     }
 }

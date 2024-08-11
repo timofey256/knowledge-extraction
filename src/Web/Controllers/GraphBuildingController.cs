@@ -1,37 +1,30 @@
 namespace KnowledgeExtractionTool.Controllers;
 
-using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using KnowledgeExtractionTool.Infra.Services.Interfaces;
 using KnowledgeExtractionTool.Infra.Services;
+using KnowledgeExtractionTool.Core.Domain;
 
 [ApiController]
 [Route("[controller]")]
 public class KnowledgeExtractionController : ControllerBase
 {
     private readonly ILogger<KnowledgeExtractionController> _logger;
-    private readonly ITextProcessorService _textProcessorService;
+    private readonly KnowledgeExtractorService _knowledgeExtractorService;
 
-    public KnowledgeExtractionController(ILogger<KnowledgeExtractionController> logger, ITextProcessorService textProcessor)
+    public KnowledgeExtractionController(ILogger<KnowledgeExtractionController> logger, KnowledgeExtractorService knowledgeExtractorService)
     {
         _logger = logger;
-        _textProcessorService = textProcessor;
+        _knowledgeExtractorService = knowledgeExtractorService;
     }
 
     [Authorize]
-    [HttpGet("process-text", Name = "ProcessText")]
-    public IActionResult GetProcessedText(string text)
+    [HttpGet("build-graph", Name = "BuildKnowledgeGraph")]
+    public ActionResult<KnowledgeGraph> BuildKnowledgeGraph(string text)
     {
-        _logger.Log(LogLevel.Information, "Hit someEndpoint endpoint!");
-        return Ok(_textProcessorService.Process(text));
-    }
-
-    [Authorize]
-    [HttpGet("dummy-endpoint", Name = "Dummy")]
-    public IActionResult DummyGet(string text)
-    {
-        return Ok("Autorized");
+        _logger.Log(LogLevel.Information, $"Got an BuildKnowledgeGraph request! Provided context length: {text.Length} characters");
+        return Ok(_knowledgeExtractorService.ExtractKnowledgeGraph(text));
     }
 
     [Authorize]

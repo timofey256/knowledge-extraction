@@ -1,6 +1,7 @@
 namespace KnowledgeExtractionTool.Infra.Services;
 
 using KnowledgeExtractionTool.Core.Domain;
+using KnowledgeExtractionTool.Core.Logic.LLMResponseParser;
 using Microsoft.Extensions.Options;
 
 /// <summary>
@@ -17,12 +18,15 @@ public class KnowledgeExtractorService {
         _logger = logger;
     }
 
-    public string ExtractKnowledge(string context) {
+    public KnowledgeGraph ExtractKnowledgeGraph(string context) {
         string prompt = _prompts.ConstructFinalPrompt(context);
         _logger.Log(LogLevel.Information, $"Sent prompt: {prompt}");
-        string response = _llmQueryService.GetResponseSync(prompt); 
+        string response = _llmQueryService.GetResponseSync(prompt);
 
-        return response;
+        KnowledgeGraph graph = LLMResponseParser.ConstructGraphFromLLMResponse(response);
+        
+        
+        return graph;
     }
 
 } 

@@ -5,21 +5,67 @@ using MongoDB.Driver;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using KnowledgeExtractionTool.Core.Domain;
+using KnowledgeExtractionTool.Data;
 
-public class UserService
+// This whole thing is pretty insane.
+// I wanted to do something like discriminated union in F# (which would be like 5 lines of code...) and came up with this abomination.
+// I would like to have some clear contract of what Registration should return, so I'm gonna use it.
+public enum RegistrationResultType
 {
+    Success,
+    UsedEmailError,
+    FailedInsertionError
+}
+
+public class RegistrationResult
+{
+    public RegistrationResultType Type { get; }
+    public string? ErrorMessage { get; }
+
+    private RegistrationResult(RegistrationResultType type, string? errorMessage = null)
+    {
+        Type = type;
+        ErrorMessage = errorMessage;
+    }
+
+    public static RegistrationResult Success() => new RegistrationResult(RegistrationResultType.Success);
+    public static RegistrationResult UsedEmailError() => new RegistrationResult(RegistrationResultType.UsedEmailError);
+    public static RegistrationResult FailedInsertionError(string errorMessage) => 
+        new RegistrationResult(RegistrationResultType.FailedInsertionError, errorMessage);
+
+    public T Match<T>(
+        Func<T> success,
+        Func<T> usedEmailError,
+        Func<string?, T> failedInsertionError)
+    {
+        return Type switch
+        {
+            RegistrationResultType.Success => success(),
+            RegistrationResultType.UsedEmailError => usedEmailError(),
+            RegistrationResultType.FailedInsertionError => failedInsertionError(ErrorMessage),
+            _ => throw new InvalidOperationException("Unknown registration result type")
+        };
+    }
+}
+
+public class UserService {
     private readonly IMongoCollection<User> _users;
     private readonly JwtProvider _jwtProvider;
     private readonly ILogger<KnowledgeExtractorService> _logger;
+    private readonly UsersRepository _usersRepository;
 
-    public UserService(IMongoDatabase database, JwtProvider jwtProvider, ILogger<KnowledgeExtractorService> logger)
+    public UserService(IMongoDatabase database,
+                        JwtProvider jwtProvider,
+                        UsersRepository usersRepository,
+                        ILogger<KnowledgeExtractorService> logger)
     {
         _users = database.GetCollection<User>("Users");
         _jwtProvider = jwtProvider;
         _logger = logger;
+        _usersRepository = usersRepository;
     }
 
-    public async Task<bool> RegisterAsync(string email, string password)
+    public async Task<RegistrationResult> RegisterAsync(string email, string password)
     {
         _logger.Log(LogLevel.Information, $"Registration request: [email='{email}', password='{password}]'");
         var salt = GenerateSalt();
@@ -33,27 +79,28 @@ public class UserService
             Salt = salt
         };
 
-        try {
-            await _users.InsertOneAsync(user);
-            return true;
+        if (await _usersRepository.ExistsEmail(email)) {
+            return RegistrationResult.UsedEmailError();
         }
-        catch (Exception ex)
-        {
-            _logger.Log(LogLevel.Error, $"Failed to insert user to the collection. ErrorMessage:\n {ex.Message}");
-            return false;
+
+        string? errorMessage = await _usersRepository.TryInsertUser(user);
+        if (errorMessage is not null) {
+            _logger.Log(LogLevel.Error, $"Failed to insert user to the collection. ErrorMessage:\n {errorMessage}");
+            return RegistrationResult.FailedInsertionError(errorMessage);
         }
+
+        return RegistrationResult.Success();
     }
 
     public async Task<string?> AuthenticateAsync(string email, string password)
     {
         _logger.Log(LogLevel.Information, $"Got autentication request: [email='{email}', password='{password}]'");
         User user = await _users.Find(u => u.Email == email).FirstOrDefaultAsync();
-        if (user == null) { 
+        if (user is null) { 
             _logger.Log(LogLevel.Warning, $"Autentication request: [email='{email}', password='{password}] doesn't match any email password in the collection!'");
             return null;
         } 
 
-        
         var hash = HashPassword(password, user.Salt);
         if (user.PasswordHash != hash)
             _logger.Log(LogLevel.Warning, $"Autentication request: [email='{email}', password='{password}] doesn't match password for the found user!'");

@@ -1,8 +1,6 @@
-
+namespace KnowledgeExtractionTool.Core.Logic.LLMResponseParser;
 
 using KnowledgeExtractionTool.Core.Domain;
-
-namespace KnowledgeExtractionTool.Core.Logic.LLMResponseParser;
 
 /// I want to have immutable edges in graph and do not make abominations from types in Domain
 /// So I make this intermediate type to work with here and then, when i am finished with initializing values here in this type, return DirectedKnowledgeEdge 
@@ -91,6 +89,6 @@ class LLMResponseParser {
             edges.Add(currentEdge.Build());
         }
 
-        return new KnowledgeGraph(edges.ToArray());
+        return new KnowledgeGraph(edges.ToArray(), DateTime.UtcNow);
     }
 }
