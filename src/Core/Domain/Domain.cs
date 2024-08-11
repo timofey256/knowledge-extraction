@@ -64,6 +64,9 @@ public record class KnowledgeGraph : IHasId {
     }
 }
 
+/// <summary>
+/// Type storing texts which users send us. We call them contexts
+/// </summary>
 public record class Context : IHasId {
     public string Id { get; init; }
     public string Description { get; init; }
