@@ -3,6 +3,7 @@ namespace KnowledgeExtractionTool.Data.Types;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using KnowledgeExtractionTool.Core.Interfaces;
 
 public struct DatabaseSettings {
     public bool useInMemory; // if set to `true` we will use memcached
@@ -93,10 +94,10 @@ public class SimpleMemCache<T> {
     }
 }
 
-public class User
+public class User : IHasId
 {
-    public required string Id { get; set; }
-    public required string Email { get; set; }
-    public required string PasswordHash { get; set; }
-    public required string Salt { get; set; }
+    public required string Id { get; init; }
+    public required string Email { get; init; }
+    public required string PasswordHash { get; init; }
+    public required string Salt { get; init; }
 }

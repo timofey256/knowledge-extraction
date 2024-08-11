@@ -1,31 +1,14 @@
+namespace KnowledgeExtractionTool.Data;
+
 using KnowledgeExtractionTool.Data.Types;
 using MongoDB.Driver;
 
-namespace KnowledgeExtractionTool.Data;
-
-public class UsersRepository {
-    private readonly string _collectionName;
-    private readonly IMongoCollection<User> _users;
-
-    public UsersRepository(IMongoDatabase database, string collectionName) {
-        _collectionName = collectionName;
-        _users = database.GetCollection<User>(collectionName);
-    }
-
-    public async Task<string?> TryInsertUser(User user) {
-        try {
-            await _users.InsertOneAsync(user);
-            return null;
-        }
-        catch (Exception ex)
-        {
-            return ex.Message;
-        }
-    }
+public class UsersRepository : Repository<User> {
+    public UsersRepository(IMongoDatabase database, string collectionName, DatabaseSettings settings) : base(database, collectionName, settings) { }
 
     public async Task<bool> ExistsEmail(string email) {
         var filter = Builders<User>.Filter.Eq("email", email);
-        var result = await _users.CountDocumentsAsync(filter);
+        var result = await base._documents.CountDocumentsAsync(filter);
 
         return result > 0;
     }
