@@ -14,6 +14,8 @@ public class PromptsCollection {
     public Prompts Default { get; set; }
 }
 
+// ======
+
 public record class DirectedKnowledgeEdge { 
     public string Node1 { get; init; }
     public int Node1Importance { get; init; }
@@ -57,12 +59,4 @@ public record class KnowledgeGraph {
         // TODO: rewrite:
         return base.ToString();
     }
-}
-
-public class User
-{
-    public required string Id { get; set; }
-    public required string Email { get; set; }
-    public required string PasswordHash { get; set; }
-    public required string Salt { get; set; }
 }

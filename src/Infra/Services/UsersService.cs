@@ -4,8 +4,8 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using KnowledgeExtractionTool.Core.Domain;
 using KnowledgeExtractionTool.Data;
+using KnowledgeExtractionTool.Data.Types;
 
 // This whole thing is pretty insane.
 // I wanted to do something like discriminated union in F# (which would be like 5 lines of code...) and came up with this abomination.

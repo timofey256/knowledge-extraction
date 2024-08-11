@@ -1,5 +1,4 @@
-using KnowledgeExtractionTool.Core.Domain;
-using MongoDB.Bson;
+using KnowledgeExtractionTool.Data.Types;
 using MongoDB.Driver;
 
 namespace KnowledgeExtractionTool.Data;
