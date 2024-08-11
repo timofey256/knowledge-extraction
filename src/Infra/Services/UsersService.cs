@@ -30,7 +30,7 @@ public class RegistrationResult
 
     public static RegistrationResult Success() => new RegistrationResult(RegistrationResultType.Success);
     public static RegistrationResult UsedEmailError() => new RegistrationResult(RegistrationResultType.UsedEmailError);
-    public static RegistrationResult FailedInsertionError(string errorMessage) => 
+    public static RegistrationResult FailedInsertionError(string? errorMessage) => 
         new RegistrationResult(RegistrationResultType.FailedInsertionError, errorMessage);
 
     public T Match<T>(
@@ -83,10 +83,14 @@ public class UserService {
             return RegistrationResult.UsedEmailError();
         }
 
-        string? errorMessage = await _usersRepository.TryInsertUser(user);
-        if (errorMessage is not null) {
-            _logger.Log(LogLevel.Error, $"Failed to insert user to the collection. ErrorMessage:\n {errorMessage}");
-            return RegistrationResult.FailedInsertionError(errorMessage);
+        StorageResult result = await _usersRepository.TryInsert(user);
+        if (result.MemcachedResult?.Type == OperationResultType.Error) {
+            _logger.Log(LogLevel.Error, $"Failed to insert user to the Memcached. ErrorMessage:\n {result.MemcachedResult.ErrorMessage}");
+            return RegistrationResult.FailedInsertionError(result.MemcachedResult.ErrorMessage);
+        }
+        if (result.MongoResult?.Type == OperationResultType.Error) {
+            _logger.Log(LogLevel.Error, $"Failed to insert user to the Mongo. ErrorMessage:\n {result.MemcachedResult.ErrorMessage}");
+            return RegistrationResult.FailedInsertionError(result.MongoResult.ErrorMessage);
         }
 
         return RegistrationResult.Success();
