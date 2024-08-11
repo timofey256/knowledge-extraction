@@ -43,6 +43,7 @@ public record class DirectedKnowledgeEdge {
 }
 
 public record class KnowledgeGraph { 
+    public string Id { get; init; }
     public DirectedKnowledgeEdge[] Edges { get; init; }
     public DateTime CreatedAtUTC { get; init; }
     
