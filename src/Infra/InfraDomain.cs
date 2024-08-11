@@ -1,6 +1,5 @@
 namespace KnowledgeExtractionTool.Infra.Services.InfraDomain;
 
-using AspNetCore.Identity.MongoDbCore.Models;
 using System.ComponentModel.DataAnnotations;
 
 public class RegisterRequest

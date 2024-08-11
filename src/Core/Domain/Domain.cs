@@ -1,4 +1,6 @@
+using System.Collections.Specialized;
 using KnowledgeExtractionTool.Core.Interfaces;
+using MongoDB.Driver.Core.Events;
 
 namespace KnowledgeExtractionTool.Core.Domain;
 
@@ -20,26 +22,41 @@ public class PromptsCollection {
 
 #region Graph-related stuff
 
-public record class DirectedKnowledgeEdge { 
-    public string Node1 { get; init; }
-    public int Node1Importance { get; init; }
-    public string Node2 { get; init; }
-    public int Node2Importance { get; init; }
-    public string EdgeDescription { get; init; }
+public record class Cluster : IHasId {
+    public required string Id { get; init; }
+    public required string Name { get; init; }
+}
+
+public record class DirectedKnowledgeEdge : IHasId {
+    public string Id { get; init; }
+    public required string Node1Id { get; init; }
+    public required string Node2Id { get; init; }
+    public required string Label { get; init; }
+
+    public DirectedKnowledgeEdge(string node1Id, string node2Id, string label) {
+        Id = Guid.NewGuid().ToString();
+        Node1Id = node1Id;
+        Node2Id = node2Id;
+        Label = label;
+    }
+}
+
+public record class KnowledgeNode : IHasId {
+    public string Id { get; init; }
+    public string Label { get; set; }
+    public List<string> NeighborsIds { get; set; }
+    public int Importance { get; set; }
 
     private const int _minImportance = 0;
     private const int _maxImportance = 3;
 
-
-    public DirectedKnowledgeEdge(string node1, int node1Importance, string node2, int node2Importance, string desc) {
-        ValidateNodeImportance(node1Importance);
-        ValidateNodeImportance(node2Importance);
-
-        Node1 = node1;
-        Node2 = node2;
-        Node1Importance = node1Importance;
-        Node2Importance = node2Importance;
-        EdgeDescription = desc;
+    public KnowledgeNode(string label, int importance) {
+        ValidateNodeImportance(importance);
+        
+        Id = Guid.NewGuid().ToString();
+        Label = label;
+        NeighborsIds = new List<string>();
+        Importance = importance;
     }
 
     private void ValidateNodeImportance(int importance) {
@@ -50,13 +67,21 @@ public record class DirectedKnowledgeEdge {
 
 public record class KnowledgeGraph : IHasId { 
     public string Id { get; init; }
-    public DirectedKnowledgeEdge[] Edges { get; init; }
-    public DateTime CreatedAtUTC { get; init; }
-    
-    public KnowledgeGraph(DirectedKnowledgeEdge[] edges, DateTime createdAt) {
+    public string OwnerId { get; init; }
+    public List<KnowledgeNode> Nodes { get; set; }
+    public List<DirectedKnowledgeEdge> Edges { get; set; }
+    public DateTime CreatedAt { get; init; }
+    public TimeSpan TimeTakenToCreate { get; init; } // Time taken to create the graph: get response from LLM and then construction.
+    public List<Cluster> Clusters { get; set; }
+
+
+    public KnowledgeGraph(string ownerId) {
         Id = Guid.NewGuid().ToString();
-        Edges = edges;
-        CreatedAtUTC = createdAt;
+        OwnerId = ownerId;
+        Nodes = new List<KnowledgeNode>();
+        Edges = new List<DirectedKnowledgeEdge>();
+        CreatedAt = DateTime.UtcNow;
+        Clusters = new List<Cluster>();
     }
 
     public override string? ToString()

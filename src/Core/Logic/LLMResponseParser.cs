@@ -5,18 +5,50 @@ using KnowledgeExtractionTool.Core.Domain;
 /// I want to have immutable edges in graph and do not make abominations from types in Domain
 /// So I make this intermediate type to work with here and then, when i am finished with initializing values here in this type, return DirectedKnowledgeEdge 
 /// Maybe not the best design choice tho.
-class DirectedKnowledgeEdgeConstruction {
+class ParsedBlock {
     public string? Node1 { get; set; } 
     public string? Node2 { get; set; }
     public int Node1Importance { get; set; } 
     public int Node2Importance { get; set; } 
     public string? Description { get; set; }
 
-    public DirectedKnowledgeEdge Build() {
-        if (Node1 is not null && Node2 is not null && Description is not null)
-            return new DirectedKnowledgeEdge(Node1, Node1Importance, Node2, Node2Importance, Description);
+    public KnowledgeNode? _node1;
+    public KnowledgeNode? _node2;
+    public DirectedKnowledgeEdge? _edge;
+
+    public KnowledgeNode GetFirstNode() {
+        if (Node1 is null)
+            throw new NullReferenceException("Cannot build KnowledgeEdge when some properties of DirectedKnowledgeEdgeConstruction are null!s");
+        
+        if (_node1 is null)
+            _node1 = new KnowledgeNode(Node1, Node1Importance);
+
+        return _node1;
+    }
+
+    public KnowledgeNode GetSecondNode() {
+        if (Node2 is null)
+            throw new NullReferenceException("Cannot build KnowledgeEdge when some properties of DirectedKnowledgeEdgeConstruction are null!s");
+    
+        if (_node2 is null)
+            _node2 = new KnowledgeNode(Node2, Node1Importance);
+
+        return _node2;    
+    }
+
+    public DirectedKnowledgeEdge GetEdge() {
+        if (Node1 is not null && Node2 is not null && Description is not null) {
+            if (_edge is null) {
+                var node1 = GetFirstNode(); 
+                var node2 = GetSecondNode();
+                _edge = new DirectedKnowledgeEdge(node1.Id, node2.Id, Description) { Node1Id = node1.Id, Node2Id = node2.Id, Label = Description};
+            }
+
+            return _edge;
+        }
 
         throw new NullReferenceException("Cannot build DirectedKnowledgeEdge when some properties of DirectedKnowledgeEdgeConstruction are null!s");
+
     }
 }
 
@@ -32,26 +64,29 @@ class LLMResponseParser {
     public static KnowledgeGraph ConstructGraphFromLLMResponse(string output) {
         var lines = output.Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0);
 
-        return Parse(lines);
+        return Parse("!!!InsertOwnerID!!!", lines);
     }
     
     // TODO: ugly code, not sure now how to rewrite.
-    private static KnowledgeGraph Parse(IEnumerable<string> lines) {
-        var edges = new List<DirectedKnowledgeEdge>();
-        DirectedKnowledgeEdgeConstruction? currentEdge = null;
+    private static KnowledgeGraph Parse(string ownerId, IEnumerable<string> lines) {
+        KnowledgeGraph graph = new(ownerId);
 
+        ParsedBlock? currentBlock = null;
+        
         foreach (var line in lines)
         {
             if (line == "{")
             {
-                currentEdge = new DirectedKnowledgeEdgeConstruction();
+                currentBlock = new ParsedBlock();
             }
             else if (line == "},")
             {
-                if (currentEdge != null)
+                if (currentBlock != null)
                 {
-                    edges.Add(currentEdge.Build());
-                    currentEdge = null;
+                    graph.Nodes.Add(currentBlock.GetFirstNode());
+                    graph.Nodes.Add(currentBlock.GetSecondNode());
+                    graph.Edges.Add(currentBlock.GetEdge());
+                    currentBlock = null;
                 }
             }
             else if (line.StartsWith("\""))
@@ -65,30 +100,32 @@ class LLMResponseParser {
                     switch (key)
                     {
                         case "node_1":
-                            currentEdge.Node1 = value;
+                            currentBlock.Node1 = value;
                             break;
                         case "importance_1":
-                            currentEdge.Node1Importance = int.Parse(value);
+                            currentBlock.Node1Importance = int.Parse(value);
                             break;
                         case "node_2":
-                            currentEdge.Node2 = value;
+                            currentBlock.Node2 = value;
                             break;
                         case "importance_2":
-                            currentEdge.Node2Importance = int.Parse(value);
+                            currentBlock.Node2Importance = int.Parse(value);
                             break;
                         case "edge":
-                            currentEdge.Description = value;
+                            currentBlock.Description = value;
                             break;
                     }
                 }
             }
         }
 
-        if (currentEdge != null)
+        if (currentBlock != null)
         {
-            edges.Add(currentEdge.Build());
+            graph.Nodes.Add(currentBlock.GetFirstNode());
+            graph.Nodes.Add(currentBlock.GetSecondNode());
+            graph.Edges.Add(currentBlock.GetEdge());
         }
 
-        return new KnowledgeGraph(edges.ToArray(), DateTime.UtcNow);
+        return graph;
     }
 }
