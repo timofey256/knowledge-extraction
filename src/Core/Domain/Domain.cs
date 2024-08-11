@@ -1,3 +1,5 @@
+using KnowledgeExtractionTool.Core.Interfaces;
+
 namespace KnowledgeExtractionTool.Core.Domain;
 
 // CLI Mutable
@@ -44,12 +46,13 @@ public record class DirectedKnowledgeEdge {
     }
 }
 
-public record class KnowledgeGraph { 
+public record class KnowledgeGraph : IHasId { 
     public string Id { get; init; }
     public DirectedKnowledgeEdge[] Edges { get; init; }
     public DateTime CreatedAtUTC { get; init; }
     
     public KnowledgeGraph(DirectedKnowledgeEdge[] edges, DateTime createdAt) {
+        Id = Guid.NewGuid().ToString();
         Edges = edges;
         CreatedAtUTC = createdAt;
     }
@@ -58,5 +61,17 @@ public record class KnowledgeGraph {
     {
         // TODO: rewrite:
         return base.ToString();
+    }
+}
+
+public record class Context : IHasId {
+    public string Id { get; init; }
+    public string Description { get; init; }
+    public string FullText { get; init; }
+
+    public Context(string context) {
+        Id = Guid.NewGuid().ToString();
+        FullText = context;
+        Description = ""; // Maybe add summarization of the context in the future???
     }
 }
