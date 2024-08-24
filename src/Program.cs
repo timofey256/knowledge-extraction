@@ -43,6 +43,13 @@ builder.Services.AddSingleton<UsersRepository>(sp =>
     return new UsersRepository(mongoDb, "Users", settings);
 });
 
+builder.Services.AddSingleton<GraphRepository>(sp =>
+{
+    var mongoDb = sp.GetRequiredService<IMongoDatabase>();
+    var settings = new DatabaseSettings { useInMemory = true, inMemoryOnly = false }; 
+    return new GraphRepository(mongoDb, "Graphs", settings);
+});
+
 builder.Services.AddSingleton<JwtProvider>(sp => {
     var options = sp.GetRequiredService<IOptions<JwtOptions>>();
     return new JwtProvider(options);

@@ -6,6 +6,8 @@ using KnowledgeExtractionTool.Infra.Services;
 using KnowledgeExtractionTool.Core.Domain;
 using System.Text;
 using Microsoft.Extensions.Options;
+using KnowledgeExtractionTool.Data;
+using KnowledgeExtractionTool.Data.Types;
 
 [ApiController]
 [Route("[controller]")]
@@ -15,36 +17,63 @@ public class KnowledgeExtractionController : ControllerBase
     private readonly KnowledgeExtractorService _knowledgeExtractorService;
     private readonly IOptions<JwtOptions> _jwtOptions;
     private readonly UserService _userService;
+    private readonly GraphRepository _graphRepository;
 
     public KnowledgeExtractionController(ILogger<KnowledgeExtractionController> logger, 
                                          KnowledgeExtractorService knowledgeExtractorService,
                                          UserService userService,
+                                         GraphRepository graphRepository,
                                          IOptions<JwtOptions> jwtOptions)
     {
         _logger = logger;
         _knowledgeExtractorService = knowledgeExtractorService;
         _jwtOptions = jwtOptions;
         _userService = userService;
+        _graphRepository = graphRepository;
     }
 
     [Authorize]
     [HttpGet("build-graph", Name = "BuildKnowledgeGraph")]
-    public ActionResult<KnowledgeGraph> BuildKnowledgeGraph(string text)
+    public async Task<ActionResult<KnowledgeGraph>> BuildKnowledgeGraph(string text)
     {
-        _logger.Log(LogLevel.Information, $"Got an BuildKnowledgeGraph request! Provided context length: {text.Length} characters");
+        _logger.Log(LogLevel.Information, $"Got an BuildKnowledgeGraph request! Provided context length is {text.Length} characters long.");
         var jwtToken = Request.Cookies[_jwtOptions.Value.CookiesKey];  
 
         if (jwtToken is null)  {// If user was autorized this shouldn't be null.
-            _logger.Log(LogLevel.Error, "Unexpected behaviour. User has to have its JWT token in cookies.");
-            throw new Exception("Unexpected behaviour. User has to have its JWT token in cookies.");
+            string message = "Unexpected behaviour. User has to have its JWT token in cookies.";
+            _logger.Log(LogLevel.Error, message);
+            throw new Exception(message);
         }
+
         var id = _userService.GetUserIdByToken(jwtToken);
         if (id is null) {
-            throw new Exception("Unexpected behaviour. User's JWT Token has to be in dictionary in UserService.");
+            string message = "Unexpected behaviour. User has to have its JWT token in cookies.";
+            _logger.Log(LogLevel.Error, message);
+            throw new Exception(message);
         }
-        _logger.Log(LogLevel.Information, $"Successfuly got UserId from JWT Token: {id}");
+        _logger.Log(LogLevel.Information, $"Successfuly got UserId from JWT Token: {id}.");
 
-        return Ok(_knowledgeExtractorService.ExtractKnowledgeGraph(id, text));
+        var graph = _knowledgeExtractorService.ExtractKnowledgeGraph(id, text);
+        StorageResult result = await _graphRepository.TryInsert(graph);
+        
+        LogGraphStorageResult(result);
+        return Ok(graph);
+    }
+
+    private void LogGraphStorageResult(StorageResult result) {
+        if (result.MongoResult.Type == OperationResultType.Error) {
+            _logger.Log(LogLevel.Error, $"Failed to store graph in Mongo. Error message: {result.MongoResult.ErrorMessage}");
+        }
+        else if (result.MongoResult.Type == OperationResultType.Success) {
+            _logger.Log(LogLevel.Information, "Successfuly stored graph in Mongo");
+        }
+
+        if (result.MemcachedResult.Type == OperationResultType.Error) {
+            _logger.Log(LogLevel.Error, $"Failed to store graph in Memcached. Error message: {result.MongoResult.ErrorMessage}");
+        }
+        else if (result.MongoResult.Type == OperationResultType.Success) {
+            _logger.Log(LogLevel.Information, "Successfuly stored graph in Memcached");
+        }
     }
 
     [Authorize]
@@ -86,5 +115,5 @@ public class KnowledgeExtractionController : ControllerBase
 
         return Ok(_knowledgeExtractorService.ExtractKnowledgeGraph(id, contentAsString));
     }
-    
+
 }

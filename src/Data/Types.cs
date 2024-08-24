@@ -25,7 +25,6 @@ public class OperationResult {
 
     public static OperationResult Success() => new OperationResult(OperationResultType.Success);
     public static OperationResult Error(string er) => new OperationResult(OperationResultType.Error, er);
-
 }
 
 /// <summary>
