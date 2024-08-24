@@ -58,18 +58,21 @@ class ParsedBlock {
 class LLMResponseParser {
     /// LLM supposingly returns JSON (as we request in prompt).
     /// But can we really trust that output will be JSON deserializable?
-    /// Even one wrong character might crash the derialization, so `Json.Derializer(output)` is not an option.
+    /// Even one wrong character might crash the derialization, so `Json.Derializer(output)` is not sufficiently reliable.
     /// This class will read output line by line and parse LLMs output. It's more reliable.
+    /// This approach hurts reusability and readability though.
 
-    public static KnowledgeGraph ConstructGraphFromLLMResponse(string output) {
+    public static KnowledgeGraph ConstructGraphFromLLMResponse(string ownerId, string output) {
         var lines = output.Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0);
 
-        return Parse("!!!InsertOwnerID!!!", lines);
+        var graph = Parse(lines);
+        graph.OwnerId = ownerId;
+        return graph;
     }
     
     // TODO: ugly code, not sure now how to rewrite.
-    private static KnowledgeGraph Parse(string ownerId, IEnumerable<string> lines) {
-        KnowledgeGraph graph = new(ownerId);
+    private static KnowledgeGraph Parse(IEnumerable<string> lines) {
+        KnowledgeGraph graph = new();
 
         ParsedBlock? currentBlock = null;
         

@@ -67,7 +67,7 @@ public record class KnowledgeNode : IHasId {
 
 public record class KnowledgeGraph : IHasId { 
     public string Id { get; init; }
-    public string OwnerId { get; init; }
+    public string OwnerId { get; set; }
     public List<KnowledgeNode> Nodes { get; set; }
     public List<DirectedKnowledgeEdge> Edges { get; set; }
     public DateTime CreatedAt { get; init; }
@@ -75,9 +75,9 @@ public record class KnowledgeGraph : IHasId {
     public List<Cluster> Clusters { get; set; }
 
 
-    public KnowledgeGraph(string ownerId) {
+    public KnowledgeGraph() {
         Id = Guid.NewGuid().ToString();
-        OwnerId = ownerId;
+        OwnerId = "NotSpecified";
         Nodes = new List<KnowledgeNode>();
         Edges = new List<DirectedKnowledgeEdge>();
         CreatedAt = DateTime.UtcNow;

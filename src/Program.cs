@@ -4,6 +4,8 @@ using KnowledgeExtractionTool.Infra.Services.Interfaces;
 using KnowledgeExtractionTool.Extensions;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using KnowledgeExtractionTool.Data;
+using KnowledgeExtractionTool.Data.Types;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
@@ -34,6 +36,13 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     return client.GetDatabase(appSettings.DatabaseName);
 });
 
+builder.Services.AddSingleton<UsersRepository>(sp =>
+{
+    var mongoDb = sp.GetRequiredService<IMongoDatabase>();
+    var settings = new DatabaseSettings { useInMemory = true, inMemoryOnly = false }; 
+    return new UsersRepository(mongoDb, "Users", settings);
+});
+
 builder.Services.AddSingleton<JwtProvider>(sp => {
     var options = sp.GetRequiredService<IOptions<JwtOptions>>();
     return new JwtProvider(options);
@@ -43,8 +52,9 @@ builder.Services.AddSingleton<UserService>(sp =>
 {
     var mongoDb = sp.GetRequiredService<IMongoDatabase>();
     var provider = sp.GetRequiredService<JwtProvider>();
+    var usersRepository = sp.GetRequiredService<UsersRepository>();
     var logger = sp.GetRequiredService<ILogger<KnowledgeExtractorService>>();
-    return new UserService(mongoDb, provider, logger);
+    return new UserService(mongoDb, provider, usersRepository, logger);
 });
 # endregion
 

@@ -18,12 +18,12 @@ public class KnowledgeExtractorService {
         _logger = logger;
     }
 
-    public KnowledgeGraph ExtractKnowledgeGraph(string context) {
+    public KnowledgeGraph ExtractKnowledgeGraph(string ownerId, string context) {
         string prompt = _prompts.ConstructFinalPrompt(context);
         _logger.Log(LogLevel.Information, $"Sent prompt: {prompt}");
         string response = _llmQueryService.GetResponseSync(prompt);
 
-        KnowledgeGraph graph = LLMResponseParser.ConstructGraphFromLLMResponse(response);
+        KnowledgeGraph graph = LLMResponseParser.ConstructGraphFromLLMResponse(ownerId, response);
         
         
         return graph;

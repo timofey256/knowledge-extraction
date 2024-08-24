@@ -53,6 +53,10 @@ public class UserService {
     private readonly JwtProvider _jwtProvider;
     private readonly ILogger<KnowledgeExtractorService> _logger;
     private readonly UsersRepository _usersRepository;
+    
+    // Token to user ID mappings.
+    // Big problem with invalidation here: we have to invalidate tokens from time to time. Otherwise, it leads to memory leak.
+    private Dictionary<string, string> _tokenToUserDict = new();    
 
     public UserService(IMongoDatabase database,
                         JwtProvider jwtProvider,
@@ -109,8 +113,22 @@ public class UserService {
         if (user.PasswordHash != hash)
             _logger.Log(LogLevel.Warning, $"Autentication request: [email='{email}', password='{password}] doesn't match password for the found user!'");
 
+        
+        var result = user.PasswordHash == hash ? _jwtProvider.GenerateToken(user) : null;
 
-        return user.PasswordHash == hash ? _jwtProvider.GenerateToken(user) : null;
+        if (result is not null)
+            _tokenToUserDict.Add(result, user.Id);
+
+        return result;
+    }
+
+    public string? GetUserIdByToken(string jwtToken) {
+        string id = "";
+        if (_tokenToUserDict.TryGetValue(jwtToken, out id)) {
+            return id;
+        }
+
+        return null;
     }
 
     private static string GenerateSalt()
