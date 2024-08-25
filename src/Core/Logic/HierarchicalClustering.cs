@@ -16,7 +16,7 @@ public class HierarchicalClustering {
     private KnowledgeGraph _graph;
     private List<Cluster> _clusters;
 
-    private const int _defaultNumOfNodesPerCluster = 7;
+    private const int _defaultNumOfNodesPerCluster = 7; // emperical value. just a guess from the top of my head.
 
     public HierarchicalClustering(KnowledgeGraph graph) {
         _graph = graph;
