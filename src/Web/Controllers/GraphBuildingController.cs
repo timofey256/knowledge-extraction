@@ -10,6 +10,16 @@ using KnowledgeExtractionTool.Data;
 using KnowledgeExtractionTool.Data.Types;
 using KnowledgeExtractionTool.Utils;
 
+
+using Microsoft.ML;
+using Microsoft.ML.Data;
+using Microsoft.ML.Transforms.Text;
+
+public class InputData
+{
+    public string Text { get; set; }
+}
+
 [ApiController]
 [Route("[controller]")]
 public class KnowledgeExtractionController : ControllerBase
