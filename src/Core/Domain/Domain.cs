@@ -77,7 +77,7 @@ public record class KnowledgeGraph : IHasId {
 
     public KnowledgeGraph() {
         Id = Guid.NewGuid().ToString();
-        OwnerId = "NotSpecified";
+        OwnerId = string.Empty;
         Nodes = new List<KnowledgeNode>();
         Edges = new List<DirectedKnowledgeEdge>();
         CreatedAt = DateTime.UtcNow;

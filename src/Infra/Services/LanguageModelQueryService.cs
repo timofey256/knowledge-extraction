@@ -25,7 +25,6 @@ public class LanguageModelQueryService
         _httpClient = httpClient;
         _logger = logger;
     }
-
     public async Task<string> GetResponseAsync(string prompt)
     {
         _logger.Log(LogLevel.Information, "Sending request to LLM...");

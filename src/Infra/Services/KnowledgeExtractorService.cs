@@ -25,8 +25,6 @@ public class KnowledgeExtractorService {
 
         KnowledgeGraph graph = LLMResponseParser.ConstructGraphFromLLMResponse(ownerId, response);
         
-        
         return graph;
     }
-
 } 
