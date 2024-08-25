@@ -71,13 +71,12 @@ public class HierarchicalClustering {
     }
 
     private double CalculateNodeDistance(KnowledgeNode node1, KnowledgeNode node2) {
-        // Connected nodes have distance 1
-        // Unconnected nodes have distance 2 (you can adjust this value)
-        // TODO. Suboptimal. Should determined by the shortest path instead. 
-
+        if (node1.Id == node2.Id)
+            return 0;
         if (node1.NeighborsIds.Contains(node2.Id))
-            return 1; 
-        return 2; 
+            return 1;
+        else
+            return Utils.GraphAlgorithms.CalculateNodeDistance(_graph, node1, node2); 
     }
 
     private void MergeClusters(Cluster cluster1, Cluster cluster2) {
