@@ -89,8 +89,7 @@ public class KnowledgeExtractionController : ControllerBase
         // But for simplicity let's keep it simple for now.
         var tempFilePath = Path.GetTempFileName();
 
-        if (file is not null && file.Length > 0)
-        {
+        if (file is not null && file.Length > 0) {
             using (var stream = new FileStream(tempFilePath, FileMode.Create))
                 await file.CopyToAsync(stream);
         }
@@ -99,8 +98,7 @@ public class KnowledgeExtractionController : ControllerBase
         }
 
         byte[] fileContent;
-        using (var fileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.Read))
-        {
+        using (var fileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.Read)) {
             fileContent = new byte[fileStream.Length];
             await fileStream.ReadAsync(fileContent, 0, (int)fileStream.Length);
         }
@@ -124,7 +122,7 @@ public class KnowledgeExtractionController : ControllerBase
         _logger.Log(LogLevel.Information, $"Got an GetUserGraphs request.");
         var jwtToken = Request.Cookies[_jwtOptions.Value.CookiesKey];  
 
-        if (jwtToken is null)  {// If user was autorized this shouldn't be null.
+        if (jwtToken is null) {   // If user was autorized this shouldn't be null.
             string message = "Unexpected behaviour. User has to have its JWT token in cookies.";
             _logger.Log(LogLevel.Error, message);
             return Result<string>.Failure(message);
@@ -142,18 +140,14 @@ public class KnowledgeExtractionController : ControllerBase
     }
 
     private void LogGraphStorageResult(StorageResult result) {
-        if (result.MongoResult.Type == OperationResultType.Error) {
+        if (result.MongoResult.Type == OperationResultType.Error)
             _logger.Log(LogLevel.Error, $"Failed to store graph in Mongo. Error message: {result.MongoResult.ErrorMessage}");
-        }
         else if (result.MongoResult.Type == OperationResultType.Success) {
             _logger.Log(LogLevel.Information, "Successfuly stored graph in Mongo");
-        }
 
-        if (result.MemcachedResult.Type == OperationResultType.Error) {
+        if (result.MemcachedResult.Type == OperationResultType.Error)
             _logger.Log(LogLevel.Error, $"Failed to store graph in Memcached. Error message: {result.MongoResult.ErrorMessage}");
-        }
-        else if (result.MongoResult.Type == OperationResultType.Success) {
+        else if (result.MongoResult.Type == OperationResultType.Success)
             _logger.Log(LogLevel.Information, "Successfuly stored graph in Memcached");
-        }
     }
 }
