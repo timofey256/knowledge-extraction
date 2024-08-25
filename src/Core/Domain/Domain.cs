@@ -37,11 +37,11 @@ public class Cluster : IHasId {
 
 public record class DirectedKnowledgeEdge : IHasId {
     public string Id { get; init; }
-    public required string Node1Id { get; init; }
-    public required string Node2Id { get; init; }
-    public required string Label { get; init; }
+    public string Node1Id { get; }
+    public string Node2Id { get; }
+    public string? Label { get; }
 
-    public DirectedKnowledgeEdge(string node1Id, string node2Id, string label) {
+    public DirectedKnowledgeEdge(string node1Id, string node2Id, string? label) {
         Id = Guid.NewGuid().ToString();
         Node1Id = node1Id;
         Node2Id = node2Id;
@@ -52,7 +52,6 @@ public record class DirectedKnowledgeEdge : IHasId {
 public record class KnowledgeNode : IHasId {
     public string Id { get; init; }
     public string Label { get; set; }
-    public List<string> NeighborsIds { get; set; }
     public int Importance { get; set; }
 
     private const int _minImportance = 0;
@@ -63,7 +62,6 @@ public record class KnowledgeNode : IHasId {
         
         Id = Guid.NewGuid().ToString();
         Label = label;
-        NeighborsIds = new List<string>();
         Importance = importance;
     }
 
@@ -91,11 +89,49 @@ public record class KnowledgeGraph : IHasId {
         CreatedAt = DateTime.UtcNow;
         Clusters = new List<Cluster>();
     }
+    
+    // bad bad bad design. i know :((. 
+    public void AddUniqueNode(KnowledgeNode node) {
+        if (!Nodes.Exists(s => s.Label == node.Label))
+            Nodes.Add(node);
+    }
 
-    public override string? ToString()
-    {
-        // TODO: rewrite:
-        return base.ToString();
+    public void AddUniqueEdge(KnowledgeNode node1, 
+                              KnowledgeNode node2,
+                              string? desc) {
+        var sameLabelNode1 = Nodes.Find(n => n.Label == node1.Label);
+        var sameLabelNode2 = Nodes.Find(n => n.Label == node2.Label);
+
+        if (sameLabelNode1 is not null)
+            node1 = sameLabelNode1;
+
+        if (sameLabelNode2 is not null)
+            node2 = sameLabelNode2;
+
+        var edge = new DirectedKnowledgeEdge(node1.Id, node2.Id, desc);
+        Edges.Add(edge);
+    }
+
+    public override string? ToString() {
+        string result = "[";
+        foreach (var edge in Edges) {
+            var node1 = GetNodeById(edge.Node1Id);
+            var node2 = GetNodeById(edge.Node2Id);
+            result += "\n{\n";
+            result += $"\"node_1\": \"{node1.Label}\"\n";
+            result += $"\"importance_1\": {node1.Importance}\n";
+            result += $"\"node_2\": \"{node2.Label}\"\n";
+            result += $"\"importance_2\": {node2.Importance}\n";
+            result += $"\"edge\": \"{edge.Label}\"\n";
+            result += "},\n";
+        }
+
+        result += "\n]";
+        return result;
+    }
+
+    private KnowledgeNode? GetNodeById(string id) {
+        return Nodes.Find(node => node.Id == id);
     }
 }
 

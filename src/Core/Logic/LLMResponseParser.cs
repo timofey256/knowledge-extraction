@@ -30,27 +30,21 @@ class LLMResponseParser {
 
         ParsedBlock? currentBlock = null;
         
-        foreach (var line in lines)
-        {
-            if (line == "{")
-            {
+        foreach (var line in lines) {
+            if (line == "{") {
                 currentBlock = new ParsedBlock();
             }
-            else if (line == "},")
-            {
-                if (currentBlock != null)
-                {
-                    graph.Nodes.Add(currentBlock.GetFirstNode());
-                    graph.Nodes.Add(currentBlock.GetSecondNode());
-                    graph.Edges.Add(currentBlock.GetEdge());
+            else if (line == "},") {
+                if (currentBlock != null) {
+                    graph.AddUniqueNode(currentBlock.GetFirstNode());
+                    graph.AddUniqueNode(currentBlock.GetSecondNode());
+                    graph.AddUniqueEdge(currentBlock.GetFirstNode(), currentBlock.GetSecondNode(), currentBlock.Description);
                     currentBlock = null;
                 }
             }
-            else if (line.StartsWith("\""))
-            {
+            else if (line.StartsWith("\"")) {
                 var parts = line.Split(':');
-                if (parts.Length == 2)
-                {
+                if (parts.Length == 2) {
                     var key = parts[0].Trim().Trim('"');
                     var value = parts[1].Trim().Trim(',').Trim('"');
 
@@ -76,8 +70,7 @@ class LLMResponseParser {
             }
         }
 
-        if (currentBlock != null)
-        {
+        if (currentBlock != null) {
             graph.Nodes.Add(currentBlock.GetFirstNode());
             graph.Nodes.Add(currentBlock.GetSecondNode());
             graph.Edges.Add(currentBlock.GetEdge());

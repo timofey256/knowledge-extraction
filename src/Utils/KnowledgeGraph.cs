@@ -3,7 +3,7 @@ using KnowledgeExtractionTool.Core.Domain;
 namespace KnowledgeExtractionTool.Utils;
 
 public static class GraphAlgorithms {
-    public static double CalculateNodeDistanceBFS(KnowledgeGraph graph,
+    public static double? CalculateNodeDistanceBFS(KnowledgeGraph graph,
                                                 KnowledgeNode node1, 
                                                 KnowledgeNode node2) {
         if (node1.Id == node2.Id)
@@ -14,23 +14,32 @@ public static class GraphAlgorithms {
 
         queue.Enqueue((node1, 0));
         visited.Add(node1.Id);
-
+        //Console.WriteLine(graph.ToString());
+        Console.WriteLine("=================Started=================");
         while (queue.Count > 0) {
             var (currentNode, currentDistance) = queue.Dequeue();
+            Console.WriteLine($"Current node: {currentNode.Id} | {currentNode.Label}");
+            var outcomingEdges = graph.Edges.FindAll(n => n.Node1Id == currentNode.Id);
 
-            foreach (var neighborId in currentNode.NeighborsIds) {
+            List<KnowledgeNode> neighbors = new();
+            foreach (var edge in outcomingEdges) {
+                neighbors.Add(graph.Nodes.Find(node => node.Id == edge.Node2Id));
+            }
+
+            foreach (var neighbor in neighbors) {
+                var neighborId = neighbor.Id;
                 if (neighborId == node2.Id)
                     return currentDistance + 1;
 
                 if (!visited.Contains(neighborId)) {
-                    var neighborNode = graph.Nodes.First(node => node.Id == neighborId);
-                    queue.Enqueue((neighborNode, currentDistance + 1));
+                    queue.Enqueue((neighbor, currentDistance + 1));
                     visited.Add(neighborId);
                 }
             }
         }
+        Console.WriteLine("=================Started=================");
 
-        return double.MaxValue;
+        return null;
     }
 
 } 

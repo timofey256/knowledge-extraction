@@ -51,7 +51,7 @@ public class LanguageModelQueryService
             _logger.Log(LogLevel.Error, errorMessage);
             throw new HttpRequestException(errorMessage);
         }
-
+        
         var responseContent = await response.Content.ReadAsStringAsync();
         dynamic responseObject = JsonConvert.DeserializeObject(responseContent);
         

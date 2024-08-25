@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using KnowledgeExtractionTool.Core.Domain;
 using KnowledgeExtractionTool.Extensions;
+using KnowledgeExtractionTool.Utils;
 
 /*
  * The HierarchicalClustering class implements a basic hierarchical clustering algorithm
@@ -25,63 +26,63 @@ public class HierarchicalClustering {
         _graph = graph;
         _clusters = graph.Nodes.Select(node => new Cluster(node)).ToList();
         _clusterPairs = new PriorityQueue<ClusterPair, double>();
-        InitializeClusterPairs();
-    }
-
-    private void InitializeClusterPairs() {
-        for (int i = 0; i < _clusters.Count; i++) {
-            for (int j = i + 1; j < _clusters.Count; j++) {
-                double distance = CalculateDistance(_clusters[i], _clusters[j]);
-                _clusterPairs.Enqueue(new ClusterPair(_clusters[i], _clusters[j]), distance);
-            }
-        }
+        UpdateClusterPairs();
     }
 
     public List<Cluster> Cluster(ClusteringCriteria criteria) {
         while (!criteria.ShouldStop(_clusters, _clusterPairs)) {
+            Console.WriteLine($"---------Clusters before: {_clusters.Count}---------");
             var closestPair = _clusterPairs.Dequeue();
             MergeClusters(closestPair.Cluster1, closestPair.Cluster2);
-            UpdateClusterPairs(closestPair.Cluster1, closestPair.Cluster2);
+            UpdateClusterPairs();
+            Console.WriteLine($"---------Clusters after: {_clusters.Count}---------");
         }
         return _clusters;
     }
 
-    private void UpdateClusterPairs(Cluster merged, Cluster removed) {
-        _clusterPairs.RemoveWhere(pair => pair.Contains(removed));
-        foreach (var cluster in _clusters.Where(c => c != merged)) {
-            double distance = CalculateDistance(merged, cluster);
-            _clusterPairs.Enqueue(new ClusterPair(merged, cluster), distance);
+    private void UpdateClusterPairs() {
+        _clusterPairs = new PriorityQueue<ClusterPair, double>();
+
+        for (int i = 0; i < _clusters.Count; i++) {
+            for (int j = 0; j < _clusters.Count; j++) {
+                if (i == j) continue;
+
+                double? distance = CalculateDistance(_clusters[i], _clusters[j]);
+                if (distance is null) 
+                    continue;
+                
+                Console.WriteLine($"Enqueue (({_clusters[i]}, {_clusters[j]}), {distance})");
+                _clusterPairs.Enqueue(new ClusterPair(_clusters[i], _clusters[j]), distance.Value);
+            }
         }
     }
 
-    private double CalculateDistance(Cluster cluster1, Cluster cluster2) {
-        double minDistance = double.MaxValue;
+    private double? CalculateDistance(Cluster cluster1, Cluster cluster2) {
+        double? minDistance = null;
         foreach (var node1 in cluster1.Nodes) {
             foreach (var node2 in cluster2.Nodes) {
-                double distance = CalculateNodeDistance(node1, node2);
-                if (distance < minDistance)
-                    minDistance = distance;
+                double? distance = CalculateNodeDistance(node1, node2);
+                if (distance is null)
+                    continue;
+                else if (distance < minDistance || minDistance is null)
+                    minDistance = distance.Value;
             }
         }
         return minDistance;
     }
 
-    private double CalculateNodeDistance(KnowledgeNode node1, KnowledgeNode node2) {
+    private double? CalculateNodeDistance(KnowledgeNode node1, KnowledgeNode node2) {
         if (node1.Id == node2.Id)
             return 0;
 
         // Combine graph distance with semantic similarity
-        double graphDistance = CalculateGraphDistance(node1, node2);
+        double? graphDistance = GraphAlgorithms.CalculateNodeDistanceBFS(_graph, node1, node2);
+        if (graphDistance is null)
+            return null;
+        Console.WriteLine($"GraphDistance between {node1.Label} and {node2.Label} = {graphDistance}");
         double semanticSimilarity = CalculateSemanticSimilarity(node1, node2);
         
         return (graphDistance + (1 - semanticSimilarity)) / 2;
-    }
-
-    private double CalculateGraphDistance(KnowledgeNode node1, KnowledgeNode node2) {
-        if (node1.NeighborsIds.Contains(node2.Id))
-            return 1;
-        else
-            return Utils.GraphAlgorithms.CalculateNodeDistanceBFS(_graph, node1, node2);
     }
 
     private double CalculateSemanticSimilarity(KnowledgeNode node1, KnowledgeNode node2) {
@@ -97,9 +98,13 @@ public class HierarchicalClustering {
         _clusters.Remove(cluster1);
         _clusters.Remove(cluster2);
         _clusters.Add(newCluster);
+        Console.WriteLine($"In new cluster there are {newCluster.Nodes.Count} nodes");
     }
 }
 
+/// <summary>
+/// Represents a pair of clusters in a hierarchical clustering algorithm.
+/// </summary>
 public class ClusterPair {
     public Cluster Cluster1 { get; }
     public Cluster Cluster2 { get; }
@@ -112,17 +117,38 @@ public class ClusterPair {
     public bool Contains(Cluster cluster) => Cluster1 == cluster || Cluster2 == cluster;
 }
 
+/// <summary>
+/// Defines the criteria for controlling the clustering process in a hierarchical clustering algorithm.
+/// </summary>
 public class ClusteringCriteria {
-    public int MinClusters { get; set; }
-    public double MaxDistance { get; set; }
+    /// <summary>
+    /// Gets or sets the minimum number of clusters required before the clustering process stops.
+    /// </summary>
+    public readonly int MaxClusters;
+
+    /// <summary>
+    /// Gets or sets the maximum allowable distance between clusters for the clustering process to continue.
+    /// </summary>
+    public readonly double MaxDistance;
+
+    public ClusteringCriteria(int maxClusters, int maxDistance) {
+        MaxClusters = maxClusters;
+        MaxDistance = maxDistance;
+    }
 
     public bool ShouldStop(List<Cluster> clusters, PriorityQueue<ClusterPair, double> clusterPairs) {
-        if (clusters.Count <= MinClusters)
-            return true;
+        if (clusters.Count <= MaxClusters){
+            Console.WriteLine("Stopped because <= MaxClusters"); return true;
+        }
 
-        clusterPairs.TryPeek(out ClusterPair val, out double priorityVal); //for int type
-        if (clusterPairs.Count > 0 && priorityVal > MaxDistance)
-            return true;
+        if (clusterPairs.Count <= 0) {
+            Console.WriteLine("Stopped because empty queue"); return true;
+        }
+
+        clusterPairs.TryPeek(out ClusterPair val, out double priorityVal);
+        if (priorityVal > MaxDistance) {
+            Console.WriteLine("Stopped because > MaxDistance"); return true;
+        }
 
         return false;
     }

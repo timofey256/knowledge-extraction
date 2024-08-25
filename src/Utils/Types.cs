@@ -65,13 +65,12 @@ class ParsedBlock {
             if (_edge is null) {
                 var node1 = GetFirstNode(); 
                 var node2 = GetSecondNode();
-                _edge = new DirectedKnowledgeEdge(node1.Id, node2.Id, Description) { Node1Id = node1.Id, Node2Id = node2.Id, Label = Description};
+                _edge = new DirectedKnowledgeEdge(node1.Id, node2.Id, Description);
             }
 
             return _edge;
         }
 
         throw new NullReferenceException("Cannot build DirectedKnowledgeEdge when some properties of DirectedKnowledgeEdgeConstruction are null!s");
-
     }
 }
