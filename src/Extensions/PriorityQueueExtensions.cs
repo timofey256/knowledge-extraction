@@ -8,7 +8,7 @@ public static class PriorityQueueExtensions {
         var elements = new List<(TElement element, TPriority priority)>();
 
         while (queue.Count > 0) {
-            queue.TryDequeue(out TElement val, out TPriority priorityval); // for int type
+            queue.TryDequeue(out TElement val, out TPriority priorityval);
             elements.Add((val, priorityval));
         }
 

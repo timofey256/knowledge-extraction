@@ -85,9 +85,9 @@ public class HierarchicalClustering {
     }
 
     private double CalculateSemanticSimilarity(KnowledgeNode node1, KnowledgeNode node2) {
-        // Implement semantic similarity calculation here
-        // This could use techniques like cosine similarity on node embeddings or TF-IDF vectors
-        // For now, we'll use a placeholder implementation
+        // TODO: Implement semantic similarity calculation here (ML.NET?).
+        // This could use techniques like cosine similarity on node embeddings or TF-IDF vectors.
+        // For now, we'll use a placeholder implementation.
         return 0.5;
     }
 
