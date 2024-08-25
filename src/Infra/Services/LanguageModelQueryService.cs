@@ -10,6 +10,7 @@ namespace KnowledgeExtractionTool.Infra.Services;
 /// </summary>
 public class LanguageModelQueryService
 {
+    private readonly string _llmApiEndpoint;
     private readonly string _modelName;
     private readonly string _apiKey;
     private readonly HttpClient _httpClient;
@@ -18,6 +19,7 @@ public class LanguageModelQueryService
     public LanguageModelQueryService(IOptions<AppSettings> appSettingsOption, HttpClient httpClient, ILogger<LanguageModelQueryService> logger)
     {
         var appSettings = appSettingsOption.Value;
+        _llmApiEndpoint = appSettings.Endpoint;
         _apiKey = appSettings.ApiKey;
         _modelName = appSettings.ModelName;
         _httpClient = httpClient;
@@ -42,7 +44,7 @@ public class LanguageModelQueryService
 
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
 
-        var response = await _httpClient.PostAsync("https://api.together.xyz/v1/chat/completions", httpContent);
+        var response = await _httpClient.PostAsync(_llmApiEndpoint, httpContent);
         
         if (!response.IsSuccessStatusCode)
         {
