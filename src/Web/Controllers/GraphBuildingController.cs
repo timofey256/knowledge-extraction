@@ -37,20 +37,13 @@ public class KnowledgeExtractionController : ControllerBase
     public async Task<ActionResult<KnowledgeGraph>> BuildKnowledgeGraph(string text)
     {
         _logger.Log(LogLevel.Information, $"Got an BuildKnowledgeGraph request! Provided context length is {text.Length} characters long.");
-        var jwtToken = Request.Cookies[_jwtOptions.Value.CookiesKey];  
 
-        if (jwtToken is null)  {// If user was autorized this shouldn't be null.
-            string message = "Unexpected behaviour. User has to have its JWT token in cookies.";
-            _logger.Log(LogLevel.Error, message);
-            throw new Exception(message);
+        var IdResult = GetUserIdFromRequest();
+        if (!IdResult.IsSuccess && IdResult.Value is null) {
+            BadRequest($"Error occured: {IdResult.ErrorMessage}");
         }
-
-        var id = _userService.GetUserIdByToken(jwtToken);
-        if (id is null) {
-            string message = "Unexpected behaviour. User has to have its JWT token in cookies.";
-            _logger.Log(LogLevel.Error, message);
-            throw new Exception(message);
-        }
+        string? id = IdResult.Value;
+        
         _logger.Log(LogLevel.Information, $"Successfuly got UserId from JWT Token: {id}.");
 
         var graph = _knowledgeExtractorService.ExtractKnowledgeGraph(id, text);
@@ -60,20 +53,19 @@ public class KnowledgeExtractionController : ControllerBase
         return Ok(graph);
     }
 
-    private void LogGraphStorageResult(StorageResult result) {
-        if (result.MongoResult.Type == OperationResultType.Error) {
-            _logger.Log(LogLevel.Error, $"Failed to store graph in Mongo. Error message: {result.MongoResult.ErrorMessage}");
+    [Authorize]
+    [HttpGet("get-user-graphs", Name = "Get All User's Graphs")]
+    public async Task<ActionResult<List<KnowledgeGraph>>> GetUserGraphs(string text)
+    {
+        _logger.Log(LogLevel.Information, $"Got an GetUserGraphs request.");
+        
+        var IdResult = GetUserIdFromRequest();
+        if (!IdResult.IsSuccess) {
+            BadRequest($"Error occured: {IdResult.ErrorMessage}");
         }
-        else if (result.MongoResult.Type == OperationResultType.Success) {
-            _logger.Log(LogLevel.Information, "Successfuly stored graph in Mongo");
-        }
-
-        if (result.MemcachedResult.Type == OperationResultType.Error) {
-            _logger.Log(LogLevel.Error, $"Failed to store graph in Memcached. Error message: {result.MongoResult.ErrorMessage}");
-        }
-        else if (result.MongoResult.Type == OperationResultType.Success) {
-            _logger.Log(LogLevel.Information, "Successfuly stored graph in Memcached");
-        }
+        
+        var graphs = await _graphRepository.FindByOwnerIdAsync(IdResult.Value);
+        return Ok(graphs);
     }
 
     [Authorize]
@@ -116,4 +108,40 @@ public class KnowledgeExtractionController : ControllerBase
         return Ok(_knowledgeExtractorService.ExtractKnowledgeGraph(id, contentAsString));
     }
 
+    private Result<string> GetUserIdFromRequest() {
+        _logger.Log(LogLevel.Information, $"Got an GetUserGraphs request.");
+        var jwtToken = Request.Cookies[_jwtOptions.Value.CookiesKey];  
+
+        if (jwtToken is null)  {// If user was autorized this shouldn't be null.
+            string message = "Unexpected behaviour. User has to have its JWT token in cookies.";
+            _logger.Log(LogLevel.Error, message);
+            return Result<string>.Failure(message);
+        }
+
+        var id = _userService.GetUserIdByToken(jwtToken);
+        if (id is null) {
+            string message = "Unexpected behaviour. User has to have its JWT token in cookies.";
+            _logger.Log(LogLevel.Error, message);
+            return Result<string>.Failure(message);
+        }
+        _logger.Log(LogLevel.Information, $"Successfuly got UserId from JWT Token: {id}.");
+
+        return Result<string>.Success(id);
+    }
+
+    private void LogGraphStorageResult(StorageResult result) {
+        if (result.MongoResult.Type == OperationResultType.Error) {
+            _logger.Log(LogLevel.Error, $"Failed to store graph in Mongo. Error message: {result.MongoResult.ErrorMessage}");
+        }
+        else if (result.MongoResult.Type == OperationResultType.Success) {
+            _logger.Log(LogLevel.Information, "Successfuly stored graph in Mongo");
+        }
+
+        if (result.MemcachedResult.Type == OperationResultType.Error) {
+            _logger.Log(LogLevel.Error, $"Failed to store graph in Memcached. Error message: {result.MongoResult.ErrorMessage}");
+        }
+        else if (result.MongoResult.Type == OperationResultType.Success) {
+            _logger.Log(LogLevel.Information, "Successfuly stored graph in Memcached");
+        }
+    }
 }
