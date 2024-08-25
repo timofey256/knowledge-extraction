@@ -1,8 +1,8 @@
 namespace KnowledgeExtractionTool.Data.Types;
 
 using System;
-using System.Collections.Concurrent;
 using System.Threading;
+using System.Collections.Concurrent;
 using KnowledgeExtractionTool.Core.Interfaces;
 
 public struct DatabaseSettings {

@@ -1,6 +1,6 @@
-using KnowledgeExtractionTool.Core.Domain;
-
 namespace KnowledgeExtractionTool.Utils;
+
+using KnowledgeExtractionTool.Core.Domain;
 
 public static class GraphAlgorithms {
     public static double? CalculateNodeDistanceBFS(KnowledgeGraph graph,
@@ -14,11 +14,8 @@ public static class GraphAlgorithms {
 
         queue.Enqueue((node1, 0));
         visited.Add(node1.Id);
-        //Console.WriteLine(graph.ToString());
-        Console.WriteLine("=================Started=================");
         while (queue.Count > 0) {
             var (currentNode, currentDistance) = queue.Dequeue();
-            Console.WriteLine($"Current node: {currentNode.Id} | {currentNode.Label}");
             var outcomingEdges = graph.Edges.FindAll(n => n.Node1Id == currentNode.Id);
 
             List<KnowledgeNode> neighbors = new();
@@ -37,7 +34,6 @@ public static class GraphAlgorithms {
                 }
             }
         }
-        Console.WriteLine("=================Started=================");
 
         return null;
     }

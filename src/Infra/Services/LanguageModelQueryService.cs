@@ -1,9 +1,9 @@
+namespace KnowledgeExtractionTool.Infra.Services;
+
 using System.Text;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-
-namespace KnowledgeExtractionTool.Infra.Services;
 
 /// <summary>
 /// Sends requests to LLM provider and returns responses.  
