@@ -1,13 +1,14 @@
 namespace KnowledgeExtractionTool.Controllers;
 
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using KnowledgeExtractionTool.Infra.Services;
-using KnowledgeExtractionTool.Core.Domain;
-using System.Text;
 using Microsoft.Extensions.Options;
+using KnowledgeExtractionTool.Core.Domain;
+using KnowledgeExtractionTool.Infra.Services;
 using KnowledgeExtractionTool.Data;
 using KnowledgeExtractionTool.Data.Types;
+using KnowledgeExtractionTool.Utils;
 
 [ApiController]
 [Route("[controller]")]
