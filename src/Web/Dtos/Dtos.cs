@@ -10,7 +10,6 @@ public record class DirectedKnowledgeEdgeDto {
     private const int _minImportance = 0;
     private const int _maxImportance = 3;
 
-
     public DirectedKnowledgeEdgeDto(string node1, int node1Importance, string node2, int node2Importance, string desc) {
         ValidateNodeImportance(node1Importance);
         ValidateNodeImportance(node2Importance);

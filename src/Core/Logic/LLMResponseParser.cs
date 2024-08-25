@@ -52,9 +52,12 @@ class ParsedBlock {
     }
 }
 
-/// <summary>
-/// Parses LLM's output to Knowledge Graph. 
-/// </summary>
+/*
+ * The LLMResponseParser class is designed to handle the potential unreliability of JSON
+ * output from a LLM. While we may request that the LLM outputs data in
+ * a JSON format, there's no guarantee that the output will be perfectly structured and
+ * deserializable. This class takes a more robust approach by parsing the output line by line.
+ */
 class LLMResponseParser {
     /// LLM supposingly returns JSON (as we request in prompt).
     /// But can we really trust that output will be JSON deserializable?

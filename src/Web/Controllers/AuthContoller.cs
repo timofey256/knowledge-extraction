@@ -5,17 +5,14 @@ using Microsoft.Extensions.Options;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
-{
+public class AuthController : ControllerBase {
     private readonly UserService _userService;
     private readonly HttpContext? _httpContext;
     private readonly JwtOptions _jwtOptions;
 
-    public AuthController(UserService userService, IHttpContextAccessor httpContextAccessor, IOptions<JwtOptions> jwtOptions)
-    {
-        if (httpContextAccessor.HttpContext is null) {
+    public AuthController(UserService userService, IHttpContextAccessor httpContextAccessor, IOptions<JwtOptions> jwtOptions) {
+        if (httpContextAccessor.HttpContext is null)
             new NullReferenceException("AuthController: HttpContext is null!");
-        }
 
         _userService = userService;
         _httpContext = httpContextAccessor.HttpContext;
@@ -23,8 +20,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest model)
-    {
+    public async Task<IActionResult> Register([FromBody] RegisterRequest model) {
         var registrationResult = await _userService.RegisterAsync(model.Email, model.Password);
         return registrationResult.Match<IActionResult>(
             success: () => Ok(),
@@ -34,8 +30,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest model)
-    {
+    public async Task<IActionResult> Login([FromBody] LoginRequest model) {
         var token = await _userService.AuthenticateAsync(model.Email, model.Password);
         if (token != null)
         {

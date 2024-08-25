@@ -6,8 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace KnowledgeExtractionTool.Extensions;
 
 public static class ApiExtensions {
-    public static void AddMappedEndpoints(this IEndpointRouteBuilder app) {
-    }
+    public static void AddMappedEndpoints(this IEndpointRouteBuilder app) { }
 
     public static void AddApiAutentication(this IServiceCollection services, JwtOptions? jwtSettings) {
         if (jwtSettings is null) {

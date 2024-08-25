@@ -4,6 +4,12 @@ using KnowledgeExtractionTool.Data.Types;
 using KnowledgeExtractionTool.Core.Interfaces;
 using MongoDB.Driver;
 
+/*
+ * The Repository<T> class is a generic repository implementation designed to handle the storage 
+ * of documents in both MongoDB and an in-memory cache. The class serves as an abstraction layer 
+ * that facilitates interaction with a MongoDB collection while optionally leveraging an in-memory 
+ * cache for faster data retrieval. The concrete settings are specified with DatabaseSettings in constructor.
+ */
 public class Repository<T> where T : IHasId {
     protected readonly DatabaseSettings _settings;
 

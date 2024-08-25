@@ -32,10 +32,14 @@ public class KnowledgeExtractionController : ControllerBase
         _graphRepository = graphRepository;
     }
 
+    /// <summary>
+    /// Builds a knowledge graph from the provided text context and stores it.
+    /// </summary>
+    /// <param name="text">The context text from which to extract the knowledge graph.</param>
+    /// <returns>A KnowledgeGraph object representing the extracted knowledge.</returns>
     [Authorize]
     [HttpGet("build-graph", Name = "BuildKnowledgeGraph")]
-    public async Task<ActionResult<KnowledgeGraph>> BuildKnowledgeGraph(string text)
-    {
+    public async Task<ActionResult<KnowledgeGraph>> BuildKnowledgeGraph(string text) {
         _logger.Log(LogLevel.Information, $"Got an BuildKnowledgeGraph request! Provided context length is {text.Length} characters long.");
 
         var IdResult = GetUserIdFromRequest();
@@ -53,10 +57,13 @@ public class KnowledgeExtractionController : ControllerBase
         return Ok(graph);
     }
 
+    /// <summary>
+    /// Retrieves all knowledge graphs associated with the user.
+    /// </summary>
+    /// <returns>A list of KnowledgeGraph objects associated with the user.</returns>
     [Authorize]
     [HttpGet("get-user-graphs", Name = "Get All User's Graphs")]
-    public async Task<ActionResult<List<KnowledgeGraph>>> GetUserGraphs(string text)
-    {
+    public async Task<ActionResult<List<KnowledgeGraph>>> GetUserGraphs(string text) {
         _logger.Log(LogLevel.Information, $"Got an GetUserGraphs request.");
         
         var IdResult = GetUserIdFromRequest();
@@ -68,10 +75,14 @@ public class KnowledgeExtractionController : ControllerBase
         return Ok(graphs);
     }
 
+    /// <summary>
+    /// Uploads a file, extracts knowledge from its content, and returns the knowledge graph.
+    /// </summary>
+    /// <param name="file">The file to upload and process.</param>
+    /// <returns>An ActionResult containing the extracted knowledge graph.</returns>
     [Authorize]
     [HttpPost("file-upload", Name = "FileUpload")]
-    public async Task<ActionResult> UploadFile(IFormFile file)
-    {
+    public async Task<ActionResult> UploadFile(IFormFile file) {
         // Currently, we save these files to /tmp location on the server.
         // It is obviously far from a good solution. Better way to store them would probably be using some S3.
         // But for simplicity let's keep it simple for now.

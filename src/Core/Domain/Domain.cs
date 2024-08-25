@@ -1,6 +1,4 @@
-using System.Collections.Specialized;
 using KnowledgeExtractionTool.Core.Interfaces;
-using MongoDB.Driver.Core.Events;
 
 namespace KnowledgeExtractionTool.Core.Domain;
 
@@ -22,9 +20,19 @@ public class PromptsCollection {
 
 #region Graph-related stuff
 
-public record class Cluster : IHasId {
-    public required string Id { get; init; }
-    public required string Name { get; init; }
+public class Cluster : IHasId {
+    public string Id { get; init; }
+    public List<KnowledgeNode> Nodes { get; set; }
+
+    public Cluster(KnowledgeNode node) {
+        Id = Guid.NewGuid().ToString();
+        Nodes = new List<KnowledgeNode> { node };
+    }
+
+    public Cluster(List<KnowledgeNode> nodes) {
+        Id = Guid.NewGuid().ToString();
+        Nodes = nodes;
+    }
 }
 
 public record class DirectedKnowledgeEdge : IHasId {
