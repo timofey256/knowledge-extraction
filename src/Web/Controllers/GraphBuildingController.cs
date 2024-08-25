@@ -142,7 +142,7 @@ public class KnowledgeExtractionController : ControllerBase
     private void LogGraphStorageResult(StorageResult result) {
         if (result.MongoResult.Type == OperationResultType.Error)
             _logger.Log(LogLevel.Error, $"Failed to store graph in Mongo. Error message: {result.MongoResult.ErrorMessage}");
-        else if (result.MongoResult.Type == OperationResultType.Success) {
+        else if (result.MongoResult.Type == OperationResultType.Success)
             _logger.Log(LogLevel.Information, "Successfuly stored graph in Mongo");
 
         if (result.MemcachedResult.Type == OperationResultType.Error)
