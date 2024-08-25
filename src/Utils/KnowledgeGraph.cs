@@ -3,7 +3,7 @@ using KnowledgeExtractionTool.Core.Domain;
 namespace KnowledgeExtractionTool.Utils;
 
 public static class GraphAlgorithms {
-    public static double CalculateNodeDistance(KnowledgeGraph graph,
+    public static double CalculateNodeDistanceBFS(KnowledgeGraph graph,
                                                 KnowledgeNode node1, 
                                                 KnowledgeNode node2) {
         if (node1.Id == node2.Id)

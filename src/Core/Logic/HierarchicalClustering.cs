@@ -76,7 +76,7 @@ public class HierarchicalClustering {
         if (node1.NeighborsIds.Contains(node2.Id))
             return 1;
         else
-            return Utils.GraphAlgorithms.CalculateNodeDistance(_graph, node1, node2); 
+            return Utils.GraphAlgorithms.CalculateNodeDistanceBFS(_graph, node1, node2); 
     }
 
     private void MergeClusters(Cluster cluster1, Cluster cluster2) {
