@@ -42,6 +42,36 @@ public class StorageResult {
     }
 }
 
+public class Result<T>
+{
+    public T? Value { get; }
+    public bool IsSuccess { get; }
+    public string? ErrorMessage { get; }
+
+    protected Result(T value)
+    {
+        IsSuccess = true;
+        Value = value;
+    }
+
+    protected Result(string errorMessage)
+    {
+        IsSuccess = false;
+        ErrorMessage = errorMessage;
+    }
+
+    public static Result<T> Success(T value)
+    {
+        return new Result<T>(value);
+    }
+
+    public static Result<T> Failure(string errorMessage)
+    {
+        return new Result<T>(errorMessage);
+    }
+}
+
+
 public class SimpleMemCache<T> {
     private class CacheItem
     {
