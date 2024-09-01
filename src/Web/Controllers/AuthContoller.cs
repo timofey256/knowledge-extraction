@@ -42,8 +42,7 @@ public class AuthController : ControllerBase {
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest model) {
         var token = await _userService.AuthenticateAsync(model.Email, model.Password);
-        if (token != null)
-        {
+        if (token != null) {
             // Here for simplicity we are storing JWT token in cookies
             // which is obviously a bad practice...
             // Should be redone later if any extra time available
