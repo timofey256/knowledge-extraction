@@ -8,16 +8,16 @@ using Newtonsoft.Json;
 /// <summary>
 /// Sends requests to LLM provider and returns responses.  
 /// </summary>
-public class LanguageModelQueryService
-{
+public class LanguageModelQueryService {
     private readonly string _llmApiEndpoint;
     private readonly string _modelName;
     private readonly string _apiKey;
     private readonly HttpClient _httpClient;
     private readonly ILogger<LanguageModelQueryService> _logger;
 
-    public LanguageModelQueryService(IOptions<AppSettings> appSettingsOption, HttpClient httpClient, ILogger<LanguageModelQueryService> logger)
-    {
+    public LanguageModelQueryService(IOptions<AppSettings> appSettingsOption, 
+                                     HttpClient httpClient, 
+                                     ILogger<LanguageModelQueryService> logger) {
         var appSettings = appSettingsOption.Value;
         _llmApiEndpoint = appSettings.Endpoint;
         _apiKey = appSettings.ApiKey;
@@ -25,12 +25,11 @@ public class LanguageModelQueryService
         _httpClient = httpClient;
         _logger = logger;
     }
-    public async Task<string> GetResponseAsync(string prompt)
-    {
+
+    public async Task<string> GetResponseAsync(string prompt) {
         _logger.Log(LogLevel.Information, "Sending request to LLM...");
         
-        var requestBody = new
-        {
+        var requestBody = new {
             model = _modelName,
             messages = new[]
             {
@@ -45,8 +44,7 @@ public class LanguageModelQueryService
 
         var response = await _httpClient.PostAsync(_llmApiEndpoint, httpContent);
         
-        if (!response.IsSuccessStatusCode)
-        {
+        if (!response.IsSuccessStatusCode) {
             string errorMessage = $"Request failed with status code {response.StatusCode}";
             _logger.Log(LogLevel.Error, errorMessage);
             throw new HttpRequestException(errorMessage);
@@ -60,8 +58,7 @@ public class LanguageModelQueryService
         return responseObject.choices[0].message.content;
     }
 
-    public string GetResponseSync(string prompt)
-    {
+    public string GetResponseSync(string prompt) {
         return Task.Run(() => GetResponseAsync(prompt)).GetAwaiter().GetResult();
     }
 }

@@ -2,34 +2,8 @@ using KnowledgeExtractionTool.Core.Domain;
 
 namespace KnowledgeExtractionTool.Controllers.DTOs;
 
-public record class DirectedKnowledgeEdgeDto { 
-    public string Node1 { get; init; }
-    public int Node1Importance { get; init; }
-    public string Node2 { get; init; }
-    public int Node2Importance { get; init; }
-    public string EdgeDescription { get; init; }
-
-    private const int _minImportance = 0;
-    private const int _maxImportance = 3;
-
-    public DirectedKnowledgeEdgeDto(string node1, int node1Importance, string node2, int node2Importance, string desc) {
-        ValidateNodeImportance(node1Importance);
-        ValidateNodeImportance(node2Importance);
-
-        Node1 = node1;
-        Node2 = node2;
-        Node1Importance = node1Importance;
-        Node2Importance = node2Importance;
-        EdgeDescription = desc;
-    }
-
-    private void ValidateNodeImportance(int importance) {
-        if (importance > _maxImportance || importance < _minImportance)
-            throw new ArgumentException($"Node imporance is not in the valid range. Valid range : [{_minImportance}, {_maxImportance}] but actual value is {importance}");
-    }
-}
-
 public struct EdgeDto {
+    // For design decision see comment for KnowledgeGraphDto.ToString()
     public string node_1 { get; init; }
     public int importance_1 { get; init; }
     public string node_2 { get; init; }
@@ -65,7 +39,20 @@ public record class KnowledgeGraphDto {
         return graph.Nodes.Find(node => node.Id == id);
     }
 
+    /// <summary>
+    /// Converts KnowledgeGraphDto to a list of edges in the following format:
+    /// { 
+    ///     "node_1" : first node's label
+    ///     "importance_1" : first node's importance
+    ///     "node_2" : second node's label
+    ///     "importance_2" : second node's importance
+    ///     "edge" : edge's label
+    /// }
+    /// </summary>
     public override string ToString() {
+        // NOTE: This implementation and format is indeed strange.
+        // The reason for that is am not a very experienced frontend developer,
+        // so the only way i got d3.js graph going is with this format. 
         string result = "";
         result += "[\n";
         for (int i=0; i < edges.Count; i++) {

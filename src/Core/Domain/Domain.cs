@@ -90,7 +90,6 @@ public record class KnowledgeGraph : IHasId {
         Clusters = new List<Cluster>();
     }
     
-    // bad bad bad design. i know :((. 
     public void AddUniqueNode(KnowledgeNode node) {
         if (!Nodes.Exists(s => s.Label == node.Label))
             Nodes.Add(node);
@@ -110,24 +109,6 @@ public record class KnowledgeGraph : IHasId {
 
         var edge = new DirectedKnowledgeEdge(node1.Id, node2.Id, desc);
         Edges.Add(edge);
-    }
-
-    public override string? ToString() {
-        string result = "[";
-        foreach (var edge in Edges) {
-            var node1 = GetNodeById(edge.Node1Id);
-            var node2 = GetNodeById(edge.Node2Id);
-            result += "\n{\n";
-            result += $"\"node_1\": \"{node1.Label}\"\n";
-            result += $"\"importance_1\": {node1.Importance}\n";
-            result += $"\"node_2\": \"{node2.Label}\"\n";
-            result += $"\"importance_2\": {node2.Importance}\n";
-            result += $"\"edge\": \"{edge.Label}\"\n";
-            result += "},\n";
-        }
-
-        result += "\n]";
-        return result;
     }
 
     private KnowledgeNode? GetNodeById(string id) {

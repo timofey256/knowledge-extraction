@@ -39,7 +39,7 @@ public class KnowledgeExtractionController : ControllerBase
     /// </summary>
     /// <param name="text">The context text from which to extract the knowledge graph.</param>
     /// <returns>A KnowledgeGraph object representing the extracted knowledge.</returns>
-    // !! Disable for testing !! [Authorize] 
+    [Authorize] 
     [HttpGet("build-graph", Name = "BuildKnowledgeGraph")]
     public async Task<ActionResult<KnowledgeGraphDto>> BuildKnowledgeGraph(string text) {
         _logger.Log(LogLevel.Information, $"Got an BuildKnowledgeGraph request! Provided context length is {text.Length} characters long.");
