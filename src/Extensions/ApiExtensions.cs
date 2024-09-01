@@ -5,8 +5,13 @@ using Microsoft.IdentityModel.Tokens;
 namespace KnowledgeExtractionTool.Extensions;
 
 public static class ApiExtensions {
-    public static void AddMappedEndpoints(this IEndpointRouteBuilder app) { }
 
+    /// <summary>
+    /// Configures JWT authentication and authorization services
+    /// </summary>
+    /// <param name="services">Application services</param>
+    /// <param name="jwtSettings">JWT Settings</param>
+    /// <exception cref="NullReferenceException">Throws NullReferenceException if JwtSettings are null.</exception>
     public static void AddApiAutentication(this IServiceCollection services, JwtOptions? jwtSettings) {
         if (jwtSettings is null) {
             throw new NullReferenceException("ApiExtensions: JwtOptions are null!");
@@ -14,6 +19,7 @@ public static class ApiExtensions {
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => {
+                    // Configures JWT token validation parameters.
                     options.TokenValidationParameters = new()
                     {
                         ValidateIssuer = false,
@@ -22,6 +28,7 @@ public static class ApiExtensions {
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
                     };
+                    // Configures event to read token from cookies.
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
@@ -32,6 +39,7 @@ public static class ApiExtensions {
                     };
                 });
         
+        // Adds authorization services to the container.
         services.AddAuthorization();
     }
-} 
+}

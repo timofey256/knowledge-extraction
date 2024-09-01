@@ -4,6 +4,9 @@ using MongoDB.Driver;
 using KnowledgeExtractionTool.Core.Domain;
 using KnowledgeExtractionTool.Data.Types;
 
+/// <summary>
+/// Repository for storing knowledge graphs. 
+/// </summary>
 public class GraphRepository : Repository<KnowledgeGraph> {
     public GraphRepository(IMongoDatabase database, string collectionName, DatabaseSettings settings) : base(database, collectionName, settings) { }
 

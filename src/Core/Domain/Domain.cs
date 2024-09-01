@@ -4,14 +4,21 @@ namespace KnowledgeExtractionTool.Core.Domain;
 
 #region CLI-mutables
 
+/// <summary>
+/// Represents a set of prompts used in the system, including a method to construct a final prompt.
+/// </summary>
 public class Prompts { 
     public string SystemPrompt { get; set; }
 
+    // Constructs a formatted prompt by appending context to the system prompt.
     public string ConstructFinalPrompt(string context) {
         return SystemPrompt + $"\n```\n{context}\n```\n";
     }
 }
 
+/// <summary>
+/// Holds a collection of prompts, with a default prompt.
+/// </summary>
 public class PromptsCollection { 
     public Prompts Default { get; set; }
 }
@@ -20,15 +27,26 @@ public class PromptsCollection {
 
 #region Graph-related stuff
 
+/// <summary>
+/// Represents a cluster of knowledge nodes with a unique identifier.
+/// </summary>
 public class Cluster : IHasId {
     public string Id { get; init; }
     public List<KnowledgeNode> Nodes { get; set; }
 
+    /// <summary>
+    /// Initializes a cluster with a single node.
+    /// </summary>
+    /// <param name="node"></param>
     public Cluster(KnowledgeNode node) {
         Id = Guid.NewGuid().ToString();
         Nodes = new List<KnowledgeNode> { node };
     }
 
+    /// <summary>
+    /// Initializes a cluster with a list of nodes.
+    /// </summary>
+    /// <param name="nodes"></param>
     public Cluster(List<KnowledgeNode> nodes) {
         Id = Guid.NewGuid().ToString();
         Nodes = nodes;
@@ -49,6 +67,9 @@ public record class DirectedKnowledgeEdge : IHasId {
     }
 }
 
+/// <summary>
+/// Represents a knowledge node with a unique identifier, label, and importance rating.
+/// </summary>
 public record class KnowledgeNode : IHasId {
     public string Id { get; init; }
     public string Label { get; set; }
@@ -57,6 +78,11 @@ public record class KnowledgeNode : IHasId {
     private const int _minImportance = 0;
     private const int _maxImportance = 3;
 
+    /// <summary>
+    /// Initializes a node with a label and importance, validating the importance value.
+    /// </summary>
+    /// <param name="label"></param>
+    /// <param name="importance"></param>
     public KnowledgeNode(string label, int importance) {
         ValidateNodeImportance(importance);
         
@@ -65,6 +91,11 @@ public record class KnowledgeNode : IHasId {
         Importance = importance;
     }
 
+    /// <summary>
+    /// Validates the importance value to ensure it falls within the acceptable range.
+    /// </summary>
+    /// <param name="importance"></param>
+    /// <exception cref="ArgumentException"></exception>
     private void ValidateNodeImportance(int importance) {
         if (importance > _maxImportance || importance < _minImportance)
             throw new ArgumentException($"Node imporance is not in the valid range. Valid range : [{_minImportance}, {_maxImportance}] but actual value is {importance}");
@@ -80,7 +111,9 @@ public record class KnowledgeGraph : IHasId {
     public TimeSpan TimeTakenToCreate { get; init; } // Time taken to create the graph: get response from LLM and then construction.
     public List<Cluster> Clusters { get; set; }
 
-
+    /// <summary>
+    /// Initializes a knowledge graph with default values.
+    /// </summary>
     public KnowledgeGraph() {
         Id = Guid.NewGuid().ToString();
         OwnerId = string.Empty;
@@ -90,11 +123,21 @@ public record class KnowledgeGraph : IHasId {
         Clusters = new List<Cluster>();
     }
     
+    /// <summary>
+    /// Adds a node to the graph if a node with the same label does not already exist.
+    /// </summary>
+    /// <param name="node"></param>
     public void AddUniqueNode(KnowledgeNode node) {
         if (!Nodes.Exists(s => s.Label == node.Label))
             Nodes.Add(node);
     }
 
+    /// <summary>
+    /// Adds a directed edge between two nodes, creating the edge only if the nodes exist.
+    /// </summary>
+    /// <param name="node1">First KnowledgeNode</param>
+    /// <param name="node2">Second KnowledgeNode</param>
+    /// <param name="desc">Edge label</param>
     public void AddUniqueEdge(KnowledgeNode node1, 
                               KnowledgeNode node2,
                               string? desc) {
@@ -110,10 +153,6 @@ public record class KnowledgeGraph : IHasId {
         var edge = new DirectedKnowledgeEdge(node1.Id, node2.Id, desc);
         Edges.Add(edge);
     }
-
-    private KnowledgeNode? GetNodeById(string id) {
-        return Nodes.Find(node => node.Id == id);
-    }
 }
 
 #endregion
@@ -126,6 +165,10 @@ public record class Context : IHasId {
     public string Description { get; init; }
     public string FullText { get; init; }
 
+    /// <summary>
+    /// Initializes a context with a full text and an empty description.
+    /// </summary>
+    /// <param name="context"></param>
     public Context(string context) {
         Id = Guid.NewGuid().ToString();
         FullText = context;

@@ -3,6 +3,9 @@ namespace KnowledgeExtractionTool.Data;
 using KnowledgeExtractionTool.Data.Types;
 using MongoDB.Driver;
 
+/// <summary>
+/// Repository for storing knowledge users. 
+/// </summary>
 public class UsersRepository : Repository<User> {
     public UsersRepository(IMongoDatabase database, string collectionName, DatabaseSettings settings) : base(database, collectionName, settings) { }
 

@@ -19,6 +19,11 @@ public class AuthController : ControllerBase {
         _jwtOptions = jwtOptions.Value;
     }
 
+    /// <summary>
+    /// Registers a new user with the provided email and password.
+    /// Returns HTTP 200 OK on success, HTTP 400 Bad Request if the email is already used,
+    /// or HTTP 500 Internal Server Error if there is an issue with MongoDB insertion.
+    /// </summary>
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest model) {
         var registrationResult = await _userService.RegisterAsync(model.Email, model.Password);
@@ -29,6 +34,11 @@ public class AuthController : ControllerBase {
         );
     }
 
+    /// <summary>
+    /// Authenticates a user and generates a JWT token if the credentials are valid.
+    /// Stores the JWT token in cookies (not recommended for production) and returns it.
+    /// Returns HTTP 200 OK with the token on success or HTTP 401 Unauthorized if authentication fails.
+    /// </summary>
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest model) {
         var token = await _userService.AuthenticateAsync(model.Email, model.Password);

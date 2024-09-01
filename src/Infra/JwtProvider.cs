@@ -7,14 +7,26 @@ using KnowledgeExtractionTool.Data.Types;
 
 namespace KnowledgeExtractionTool.Infra;
 
+/// <summary>
+/// Provides JWT token generation functionality.
+/// </summary>
 public class JwtProvider {
 
     private readonly JwtOptions _options;
 
+    /// <summary>
+    /// Initializes JwtProvider with options from configuration.
+    /// </summary>
+    /// <param name="jwtOptions"></param>
     public JwtProvider(IOptions<JwtOptions> jwtOptions) {
         _options = jwtOptions.Value;
     }
 
+    /// <summary>
+    /// Generates a JWT token for a given user.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <returns></returns>
     public string GenerateToken(User user) {
         Claim[] claims = new Claim[] { new Claim("userId", user.Id.ToString()) };
 
@@ -29,6 +41,7 @@ public class JwtProvider {
             expires: DateTime.UtcNow.AddHours(_options.ExpiresInHours)
         );
 
+        // Serializes the token to a string format.
         var tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
 
         return tokenValue;

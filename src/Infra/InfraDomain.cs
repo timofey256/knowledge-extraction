@@ -2,8 +2,7 @@ namespace KnowledgeExtractionTool.Infra.Services.InfraDomain;
 
 using System.ComponentModel.DataAnnotations;
 
-public class RegisterRequest
-{
+public class RegisterRequest {
     [Required]
     [EmailAddress]
     public required string Email { get; set; }
@@ -13,8 +12,7 @@ public class RegisterRequest
     public required string Password { get; set; }
 }
 
-public class LoginRequest
-{
+public class LoginRequest {
     [Required]
     [EmailAddress]
     public required string Email { get; set; }
