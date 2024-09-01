@@ -12,7 +12,7 @@ using KnowledgeExtractionTool.Controllers.DTOs;
 using KnowledgeExtractionTool.Controllers.DTOs.Mappings;
 
 [ApiController]
-[Route("[controller]")]
+[Route("knowledge-extraction")]
 public class KnowledgeExtractionController : ControllerBase
 {
     private readonly ILogger<KnowledgeExtractionController> _logger;
