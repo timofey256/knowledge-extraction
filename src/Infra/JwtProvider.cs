@@ -1,8 +1,8 @@
+using System.Text;
+using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
-using System.Text;
-using System.Security.Claims;
 using KnowledgeExtractionTool.Data.Types;
 
 namespace KnowledgeExtractionTool.Infra;

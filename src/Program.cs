@@ -68,6 +68,17 @@ builder.Services.AddSingleton<UserService>(sp => {
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost") // Replace with your client URL
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 app.UseCors("AllowAllOrigins");

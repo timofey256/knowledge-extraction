@@ -4,11 +4,12 @@ using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
-using KnowledgeExtractionTool.Core.Domain;
 using KnowledgeExtractionTool.Infra.Services;
 using KnowledgeExtractionTool.Data;
 using KnowledgeExtractionTool.Data.Types;
 using KnowledgeExtractionTool.Utils;
+using KnowledgeExtractionTool.Controllers.DTOs;
+using KnowledgeExtractionTool.Controllers.DTOs.Mappings;
 
 [ApiController]
 [Route("[controller]")]
@@ -38,9 +39,9 @@ public class KnowledgeExtractionController : ControllerBase
     /// </summary>
     /// <param name="text">The context text from which to extract the knowledge graph.</param>
     /// <returns>A KnowledgeGraph object representing the extracted knowledge.</returns>
-    [Authorize]
+    // !! Disable for testing !! [Authorize] 
     [HttpGet("build-graph", Name = "BuildKnowledgeGraph")]
-    public async Task<ActionResult<KnowledgeGraph>> BuildKnowledgeGraph(string text) {
+    public async Task<ActionResult<KnowledgeGraphDto>> BuildKnowledgeGraph(string text) {
         _logger.Log(LogLevel.Information, $"Got an BuildKnowledgeGraph request! Provided context length is {text.Length} characters long.");
 
         var IdResult = GetUserIdFromRequest();
@@ -55,7 +56,8 @@ public class KnowledgeExtractionController : ControllerBase
         StorageResult result = await _graphRepository.TryInsert(graph);
         
         LogGraphStorageResult(result);
-        return Ok(graph);
+        KnowledgeGraphDto dto = Mappings.toKnowledgeGraphDto(graph);
+        return Ok(dto.ToString());
     }
 
     /// <summary>
@@ -64,7 +66,7 @@ public class KnowledgeExtractionController : ControllerBase
     /// <returns>A list of KnowledgeGraph objects associated with the user.</returns>
     [Authorize]
     [HttpGet("get-user-graphs", Name = "Get All User's Graphs")]
-    public async Task<ActionResult<List<KnowledgeGraph>>> GetUserGraphs(string text) {
+    public async Task<ActionResult<List<KnowledgeGraphDto>>> GetUserGraphs(string text) {
         _logger.Log(LogLevel.Information, $"Got an GetUserGraphs request.");
         
         var IdResult = GetUserIdFromRequest();
@@ -73,7 +75,7 @@ public class KnowledgeExtractionController : ControllerBase
         }
         
         var graphs = await _graphRepository.FindByOwnerIdAsync(IdResult.Value);
-        return Ok(graphs);
+        return Ok(graphs.Map(g => Mappings.toKnowledgeGraphDto(g)));
     }
 
     /// <summary>
@@ -81,7 +83,7 @@ public class KnowledgeExtractionController : ControllerBase
     /// </summary>
     /// <param name="file">The file to upload and process.</param>
     /// <returns>An ActionResult containing the extracted knowledge graph.</returns>
-    [Authorize]
+    [Authorize] 
     [HttpPost("file-upload", Name = "FileUpload")]
     public async Task<ActionResult> UploadFile(IFormFile file) {
         // Currently, we save these files to /tmp location on the server.

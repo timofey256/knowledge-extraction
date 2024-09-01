@@ -132,13 +132,16 @@ public class ClusteringCriteria {
 
     public bool ShouldStop(List<Cluster> clusters, PriorityQueue<ClusterPair, double> clusterPairs) {
         if (clusters.Count <= MaxClusters){
+            return true;
         }
 
         if (clusterPairs.Count <= 0) {
+            return true;
         }
 
         clusterPairs.TryPeek(out ClusterPair val, out double priorityVal);
         if (priorityVal > MaxDistance) {
+            return true;
         }
 
         return false;
