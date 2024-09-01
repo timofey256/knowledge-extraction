@@ -28,7 +28,16 @@ public class HierarchicalClustering {
         UpdateClusterPairs();
     }
 
+    /// <summary>
+    /// Clustering algorithm. Merges the closest clusters until there
+    /// less or the same clusters as were specified in clustering criteria.
+    /// 
+    /// If desired number of clusters cannot be achieved, returns the last achieved number of clusers.
+    /// </summary>
+    /// <param name="criteria">Clustering criteria</param>
+    /// <returns>List of clusters</returns>
     public List<Cluster> Cluster(ClusteringCriteria criteria) {
+        // We loop over again until either of conditions met (see ClusteringCriteria)
         while (!criteria.ShouldStop(_clusters, _clusterPairs)) {
             var closestPair = _clusterPairs.Dequeue();
             MergeClusters(closestPair.Cluster1, closestPair.Cluster2);
@@ -42,6 +51,7 @@ public class HierarchicalClustering {
 
         for (int i = 0; i < _clusters.Count; i++) {
             for (int j = 0; j < _clusters.Count; j++) {
+                // Skip distance calculation for a cluster with itself
                 if (i == j) continue;
 
                 double? distance = CalculateDistance(_clusters[i], _clusters[j]);
