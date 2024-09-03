@@ -5,7 +5,18 @@
     /Core - core logic
         /Domain - domain objects and interfaces
         /Logic - application logic
-    /Data - everything that has
+    /Data - everything that has to do with data storing: MongoDb and Memcached
+    /Extensions
+    /Utils
+    /Infra
+        /Services
+        InfaDomain.cs
+        Interfaces.cs
+    /Web
+        /Dtos - data transfer objects
+        /Controllers - endpoints
+        AppSettings.cs - CLI Mutable for `appsettings.json`
+    Program.cs
 /docs - technical documentation
 /extra - additional materials. mainly "frontend" and how to run it
 KnowledgeExtractionTool.csproj
