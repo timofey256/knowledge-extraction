@@ -66,7 +66,7 @@ public class KnowledgeExtractionController : ControllerBase
     /// <returns>A list of KnowledgeGraph objects associated with the user.</returns>
     [Authorize]
     [HttpGet("get-user-graphs", Name = "Get All User's Graphs")]
-    public async Task<ActionResult<List<KnowledgeGraphDto>>> GetUserGraphs(string text) {
+    public async Task<ActionResult<List<KnowledgeGraphDto>>> GetUserGraphs() {
         _logger.Log(LogLevel.Information, $"Got an GetUserGraphs request.");
         
         var IdResult = GetUserIdFromRequest();
@@ -75,7 +75,7 @@ public class KnowledgeExtractionController : ControllerBase
         }
         
         var graphs = await _graphRepository.FindByOwnerIdAsync(IdResult.Value);
-        return Ok(graphs.Map(g => Mappings.toKnowledgeGraphDto(g)));
+        return Ok(graphs.Map(g => Mappings.toKnowledgeGraphDto(g).ToString()));
     }
 
     /// <summary>

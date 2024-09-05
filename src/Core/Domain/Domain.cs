@@ -55,9 +55,9 @@ public class Cluster : IHasId {
 
 public record class DirectedKnowledgeEdge : IHasId {
     public string Id { get; init; }
-    public string Node1Id { get; }
-    public string Node2Id { get; }
-    public string? Label { get; }
+    public string Node1Id { get; set; }
+    public string Node2Id { get; set; }
+    public string? Label { get; set; }
 
     public DirectedKnowledgeEdge(string node1Id, string node2Id, string? label) {
         Id = Guid.NewGuid().ToString();
